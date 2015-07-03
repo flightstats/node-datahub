@@ -1,3 +1,4 @@
+/* global describe, beforeEach, it */
 'use strict';
 
 var expect = require('chai').expect;
@@ -659,6 +660,6 @@ describe('node-datahub', function(){
       done();
     });
 
-  })
+  });
 
 });
