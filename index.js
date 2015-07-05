@@ -30,7 +30,15 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   var that = this;
   var url = this.config.datahubUrl + '/channel';
   var data = { name: name };
-  if (ttlDays) { data.ttlDays = ttlDays; }
+  if (_.isNumber(ttlDays)) {
+    data.ttlDays = ttlDays;
+  }
+  else if (_.isString(ttlDays)){
+    ttlDays = parseInt(ttlDays, 10);
+    if (_.isNumber(ttlDays)){
+      data.ttlDays = ttlDays;
+    }
+  }
   if (description) { data.description = description; }
   if (tags) { data.tags = tags; }
 
@@ -41,7 +49,7 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
     .then(function(resp){
       var created = {
         name: resp.name,
-        href: resp['_links'].self.href,
+        href: resp._links.self.href,
         ttlDays: parseInt(resp.ttlDays, 10),
         createdOn: new Date(resp.creationDate)
       };
@@ -64,14 +72,14 @@ Datahub.prototype.getChannels = function(){
     json: true
   })
     .then(function(resp){
-      var channels = resp['_links'].channels || [];
+      var channels = resp._links.channels || [];
 
       that.config.logger.log('Retrieved hub channels on ' + url, channels.length + ' channels found');
       return channels;
     })
     .catch(function(err){
       that.config.logger.error('Error retrieving hub channels on ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -93,7 +101,7 @@ Datahub.prototype.getChannel = function(name){
     })
     .catch(function(err){
       that.config.logger.error('Error retrieving response on hub channel ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -115,12 +123,12 @@ Datahub.prototype.addContent = function(name, content){
   })
     .then(function(resp){
       var payload = {
-        url: resp['_links'].self.href,
+        url: resp._links.self.href,
         content: content,
         createdOn: new Date(resp.timestamp)
       };
 
-      var idMatch = resp['_links'].self.href.match(Datahub.idPattern);
+      var idMatch = resp._links.self.href.match(Datahub.idPattern);
       if (idMatch){
         payload.id = parseInt(idMatch[1]);
       } else {
@@ -133,7 +141,7 @@ Datahub.prototype.addContent = function(name, content){
     })
     .catch(function(err){
       that.config.logger.error('Error posting content on hub channel ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -154,7 +162,7 @@ Datahub.prototype.getContent = function(channelUrl){
     })
     .catch(function (err) {
       that.config.logger.error('Error retrieving content on hub channel ' + channelUrl, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -169,13 +177,13 @@ Datahub.prototype.deleteChannel = function(name){
   return rp(url, {
     method: 'DELETE'
   })
-    .then(function (resp) {
+    .then(function (/*resp*/) {
       that.config.logger.log('Deleted hub channel', url);
       return 202;
     })
     .catch(function (err) {
       that.config.logger.error('Error deleting hub channel ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -218,7 +226,7 @@ Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, 
     })
     .catch(function (err) {
       that.config.logger.error('Error creating hub group callback for ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -231,14 +239,14 @@ Datahub.prototype.getGroupCallbacks = function(){
     json: true
   })
     .then(function (resp) {
-      var groups = resp['_links'].groups || [];
+      var groups = resp._links.groups || [];
 
       that.config.logger.log('Retrieved hub group callbacks on ' + url, groups.length + ' group callbacks found');
       return groups;
     })
     .catch(function (err) {
       that.config.logger.error('Error retrieving hub group callbacks on ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -260,7 +268,7 @@ Datahub.prototype.getGroupCallback = function(name){
     })
     .catch(function (err) {
       that.config.logger.error('Error retrieving response on hub group callback ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
@@ -275,13 +283,13 @@ Datahub.prototype.deleteGroupCallback = function(name){
   return rp(url, {
     method: 'DELETE'
   })
-    .then(function (resp) {
+    .then(function (/*resp*/) {
       that.config.logger.log('Deleted hub group callback', url);
       return 202;
     })
     .catch(function (err) {
       that.config.logger.error('Error deleting group callback ' + url, err.message);
-      return { statusCode: err.statusCode }
+      return { statusCode: err.statusCode };
     });
 };
 
