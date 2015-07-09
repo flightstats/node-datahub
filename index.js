@@ -88,19 +88,27 @@ Datahub.prototype.getChannel = function(name){
     throw new Error("Missing channel name");
   }
 
+  var url = this.config.datahubUrl + '/channel/' + name;
+  return getHubData(this, url);
+};
+
+Datahub.prototype.deleteChannel = function(name){
+  if (!name){
+    throw new Error("Missing channel name");
+  }
+
   var that = this;
   var url = this.config.datahubUrl + '/channel/' + name;
 
   return rp(url, {
-    method: 'GET',
-    json: true
+    method: 'DELETE'
   })
-    .then(function(resp){
-      that.config.logger.log('Retrieved response on hub channel', url);
-      return resp;
+    .then(function (/*resp*/) {
+      that.config.logger.log('Deleted hub channel', url);
+      return 202;
     })
-    .catch(function(err){
-      that.config.logger.error('Error retrieving response on hub channel ' + url, err.message);
+    .catch(function (err) {
+      that.config.logger.error('Error deleting hub channel ' + url, err.message);
       return { statusCode: err.statusCode };
     });
 };
@@ -150,41 +158,25 @@ Datahub.prototype.getContent = function(channelUrl){
     throw new Error("Missing channel URL");
   }
 
-  var that = this;
-
-  return rp(channelUrl, {
-    method: 'GET',
-    json: true
-  })
-    .then(function (resp) {
-      that.config.logger.log('Retrieved content on hub channel', channelUrl);
-      return resp;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error retrieving content on hub channel ' + channelUrl, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return getHubData(this, channelUrl);
 };
 
-Datahub.prototype.deleteChannel = function(name){
+Datahub.prototype.getLatest = function(name){
   if (!name){
     throw new Error("Missing channel name");
   }
 
-  var that = this;
-  var url = this.config.datahubUrl + '/channel/' + name;
+  var url = this.config.datahubUrl + '/channel/' + name + '/latest';
+  return getHubData(this, url);
+};
 
-  return rp(url, {
-    method: 'DELETE'
-  })
-    .then(function (/*resp*/) {
-      that.config.logger.log('Deleted hub channel', url);
-      return 202;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error deleting hub channel ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+Datahub.prototype.getEarliest = function(name){
+  if (!name){
+    throw new Error("Missing channel name");
+  }
+
+  var url = this.config.datahubUrl + '/channel/' + name + '/earliest';
+  return getHubData(this, url);
 };
 
 /*
@@ -255,21 +247,8 @@ Datahub.prototype.getGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  var that = this;
   var url = this.config.datahubUrl + '/group/' + name;
-
-  return rp(url, {
-    method: 'GET',
-    json: true
-  })
-    .then(function (resp) {
-      that.config.logger.log('Retrieved response on hub group callback', url);
-      return resp;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error retrieving response on hub group callback ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return getHubData(this, url);
 };
 
 Datahub.prototype.deleteGroupCallback = function(name){
@@ -305,5 +284,20 @@ Datahub.prototype.parseChannelName = function(channelUrl){
 
   return '';
 };
+
+function getHubData(ctx, url) {
+  return rp(url, {
+    method: 'GET',
+    json: true
+  })
+    .then(function (resp) {
+      ctx.config.logger.log('Retrieved hub data', url);
+      return resp;
+    })
+    .catch(function (err) {
+      ctx.config.logger.error('Error retrieving hub data ' + url, err.message);
+      return { statusCode: err.statusCode };
+    });
+}
 
 module.exports = Datahub;

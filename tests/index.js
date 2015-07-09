@@ -45,6 +45,11 @@ describe('node-datahub', function(){
     expect(datahub).to.respondTo('getChannel');
   });
 
+  it('should have the method deleteChannel', function(){
+    var datahub = new Datahub(config);
+    expect(datahub).to.respondTo('deleteChannel');
+  });
+
   it('should have the method addContent', function(){
     var datahub = new Datahub(config);
     expect(datahub).to.respondTo('addContent');
@@ -55,9 +60,14 @@ describe('node-datahub', function(){
     expect(datahub).to.respondTo('getContent');
   });
 
-  it('should have the method deleteChannel', function(){
+  it('should have the method getLatest', function(){
     var datahub = new Datahub(config);
-    expect(datahub).to.respondTo('deleteChannel');
+    expect(datahub).to.respondTo('getLatest');
+  });
+
+  it('should have the method getEarliest', function(){
+    var datahub = new Datahub(config);
+    expect(datahub).to.respondTo('getEarliest');
   });
 
   it('should have the method upsertGroupCallback', function(){
@@ -231,6 +241,52 @@ describe('node-datahub', function(){
 
   });
 
+  describe('deleteChannel', function () {
+
+    it('should throw an Error if no channel name is supplied', function (done) {
+      var datahub = new Datahub(config);
+      expect(function () {
+        datahub.deleteChannel();
+      }).to.throw(Error);
+      done();
+    });
+
+    it('should delete a channel', function(done) {
+      nock(testHubUrl)
+        .delete('/channel/testChannel')
+        .reply(202);
+
+      var datahub = new Datahub(config);
+      var promise = datahub.deleteChannel('testChannel');
+      expect(promise).to.respondTo('then');
+
+      promise.then(function(result) {
+        expect(result).to.be.an('number');
+        expect(result).to.eql(202);
+        done();
+      });
+    });
+
+    it('should return an HTTP status code between 400-599', function(done) {
+      nock(testHubUrl)
+        .delete('/channel/testChannel')
+        .reply(404, 'Simulating delete channel thrown error!');
+
+      var datahub = new Datahub(config);
+      var promise = datahub.deleteChannel('testChannel');
+      expect(promise).to.respondTo('then');
+
+      promise.then(function(result) {
+        expect(result).to.be.an('object');
+        expect('statusCode' in result).to.eql(true);
+        expect(result.statusCode).to.be.above(399);
+        expect(result.statusCode).to.be.below(600);
+        done();
+      });
+    });
+
+  });
+
   describe('addContent', function () {
 
     it('should throw an Error if no channel name is supplied', function(done) {
@@ -370,39 +426,85 @@ describe('node-datahub', function(){
 
   });
 
-  describe('deleteChannel', function () {
+  describe('getLatest', function () {
 
     it('should throw an Error if no channel name is supplied', function (done) {
       var datahub = new Datahub(config);
       expect(function () {
-        datahub.deleteChannel();
+        datahub.getLatest();
       }).to.throw(Error);
       done();
     });
 
-    it('should delete a channel', function(done) {
+    it('should get latest', function(done) {
       nock(testHubUrl)
-        .delete('/channel/testChannel')
-        .reply(202);
+        .get('/channel/testChannel/latest')
+        .reply(200, { foo: 'bar' });
 
       var datahub = new Datahub(config);
-      var promise = datahub.deleteChannel('testChannel');
+      var promise = datahub.getLatest('testChannel');
       expect(promise).to.respondTo('then');
 
       promise.then(function(result) {
-        expect(result).to.be.an('number');
-        expect(result).to.eql(202);
+        expect(result).to.be.an('object');
+        expect('foo' in result).to.eql(true);
         done();
       });
     });
 
     it('should return an HTTP status code between 400-599', function(done) {
       nock(testHubUrl)
-        .delete('/channel/testChannel')
-        .reply(404, 'Simulating delete channel thrown error!');
+        .get('/channel/testChannel/latest')
+        .reply(404, 'Simulating get latest thrown error!');
 
       var datahub = new Datahub(config);
-      var promise = datahub.deleteChannel('testChannel');
+      var promise = datahub.getLatest('testChannel');
+      expect(promise).to.respondTo('then');
+
+      promise.then(function(result) {
+        expect(result).to.be.an('object');
+        expect('statusCode' in result).to.eql(true);
+        expect(result.statusCode).to.be.above(399);
+        expect(result.statusCode).to.be.below(600);
+        done();
+      });
+    });
+
+  });
+
+  describe('getEarliest', function () {
+
+    it('should throw an Error if no channel name is supplied', function (done) {
+      var datahub = new Datahub(config);
+      expect(function () {
+        datahub.getEarliest();
+      }).to.throw(Error);
+      done();
+    });
+
+    it('should get earliest', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/earliest')
+        .reply(200, { foo: 'bar' });
+
+      var datahub = new Datahub(config);
+      var promise = datahub.getEarliest('testChannel');
+      expect(promise).to.respondTo('then');
+
+      promise.then(function(result) {
+        expect(result).to.be.an('object');
+        expect('foo' in result).to.eql(true);
+        done();
+      });
+    });
+
+    it('should return an HTTP status code between 400-599', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/earliest')
+        .reply(404, 'Simulating get earliest thrown error!');
+
+      var datahub = new Datahub(config);
+      var promise = datahub.getEarliest('testChannel');
       expect(promise).to.respondTo('then');
 
       promise.then(function(result) {
