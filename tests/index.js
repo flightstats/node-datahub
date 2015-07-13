@@ -70,6 +70,11 @@ describe('node-datahub', function(){
     expect(datahub).to.respondTo('getEarliest');
   });
 
+  it('should have the method getStatus', function(){
+    var datahub = new Datahub(config);
+    expect(datahub).to.respondTo('getStatus');
+  });
+
   it('should have the method upsertGroupCallback', function(){
     var datahub = new Datahub(config);
     expect(datahub).to.respondTo('upsertGroupCallback');
@@ -517,6 +522,54 @@ describe('node-datahub', function(){
     });
 
   });
+
+  describe('getStatus', function () {
+
+    it('should throw an Error if no channel name is supplied', function (done) {
+      var datahub = new Datahub(config);
+      expect(function () {
+        datahub.getStatus();
+      }).to.throw(Error);
+      done();
+    });
+
+    it('should get status', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/status')
+        .reply(200, { "_links": { "latest": { "href": "..." } } });
+
+      var datahub = new Datahub(config);
+      var promise = datahub.getStatus('testChannel');
+      expect(promise).to.respondTo('then');
+
+      promise.then(function(result) {
+        expect(result).to.be.an('object');
+        expect('_links' in result).to.eql(true);
+        expect('latest' in result["_links"]).to.eql(true);
+        done();
+      });
+    });
+
+    it('should return an HTTP status code between 400-599', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/status')
+        .reply(404, 'Simulating get status thrown error!');
+
+      var datahub = new Datahub(config);
+      var promise = datahub.getStatus('testChannel');
+      expect(promise).to.respondTo('then');
+
+      promise.then(function(result) {
+        expect(result).to.be.an('object');
+        expect('statusCode' in result).to.eql(true);
+        expect(result.statusCode).to.be.above(399);
+        expect(result.statusCode).to.be.below(600);
+        done();
+      });
+    });
+
+  });
+
 
   describe('upsertGroupCallback', function () {
 
