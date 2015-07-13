@@ -161,6 +161,15 @@ Datahub.prototype.getContent = function(channelUrl){
   return getHubData(this, channelUrl);
 };
 
+Datahub.prototype.getStatus = function(name){
+  if (!name){
+    throw new Error("Missing channel name");
+  }
+
+  var url = this.config.datahubUrl + '/channel/' + name + '/status';
+  return getHubData(this, url);
+};
+
 Datahub.prototype.getLatest = function(name){
   if (!name){
     throw new Error("Missing channel name");
