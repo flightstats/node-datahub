@@ -12,7 +12,7 @@ describe('node-datahub', function(){
 
   beforeEach(function(){
     config = {
-      datahubUrl: testHubUrl
+      url: testHubUrl
     };
   });
 

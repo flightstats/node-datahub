@@ -6,11 +6,11 @@ var logger = console;
 
 function Datahub(config){
   this.config = _.assign({
-    datahubUrl: null,
+    url: null,
     logger: logger
   }, config);
 
-  if (_.isEmpty(this.config.datahubUrl)){
+  if (_.isEmpty(this.config.url)){
     throw new Error('Missing datahub URL');
   }
 }
@@ -28,7 +28,7 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/channel';
+  var url = this.config.url + '/channel';
   var data = { name: name };
   if (_.isNumber(ttlDays)) {
     data.ttlDays = ttlDays;
@@ -65,7 +65,7 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
 
 Datahub.prototype.getChannels = function(){
   var that = this;
-  var url = this.config.datahubUrl + '/channel';
+  var url = this.config.url + '/channel';
 
   return rp(url, {
     method: 'GET',
@@ -88,7 +88,7 @@ Datahub.prototype.getChannel = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name;
+  var url = this.config.url + '/channel/' + name;
   return getHubData(this, url);
 };
 
@@ -98,7 +98,7 @@ Datahub.prototype.deleteChannel = function(name){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/channel/' + name;
+  var url = this.config.url + '/channel/' + name;
 
   return rp(url, {
     method: 'DELETE'
@@ -123,7 +123,7 @@ Datahub.prototype.addContent = function(name, content){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/channel/' + name;
+  var url = this.config.url + '/channel/' + name;
 
   return rp(url, {
     method: 'POST',
@@ -166,7 +166,7 @@ Datahub.prototype.getStatus = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name + '/status';
+  var url = this.config.url + '/channel/' + name + '/status';
   return getHubData(this, url);
 };
 
@@ -175,7 +175,7 @@ Datahub.prototype.getLatest = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name + '/latest';
+  var url = this.config.url + '/channel/' + name + '/latest';
   return getHubData(this, url);
 };
 
@@ -184,7 +184,7 @@ Datahub.prototype.getEarliest = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name + '/earliest';
+  var url = this.config.url + '/channel/' + name + '/earliest';
   return getHubData(this, url);
 };
 
@@ -210,7 +210,7 @@ Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, 
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/group/' + name;
+  var url = this.config.url + '/group/' + name;
   var data = {
     channelUrl: channelUrl,
     callbackUrl: callbackUrl,
@@ -233,7 +233,7 @@ Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, 
 
 Datahub.prototype.getGroupCallbacks = function(){
   var that = this;
-  var url = this.config.datahubUrl + '/group';
+  var url = this.config.url + '/group';
 
   return rp(url, {
     method: 'GET',
@@ -256,7 +256,7 @@ Datahub.prototype.getGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  var url = this.config.datahubUrl + '/group/' + name;
+  var url = this.config.url + '/group/' + name;
   return getHubData(this, url);
 };
 
@@ -266,7 +266,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/group/' + name;
+  var url = this.config.url + '/group/' + name;
 
   return rp(url, {
     method: 'DELETE'
