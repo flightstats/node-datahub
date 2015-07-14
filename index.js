@@ -192,7 +192,7 @@ Datahub.prototype.getEarliest = function(name){
   Group Callback Operations
  */
 
-Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, parallelCalls){
+Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, parallelCalls){
   if (!name){
     throw new Error("Missing group name");
   }

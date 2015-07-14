@@ -75,9 +75,9 @@ describe('node-datahub', function(){
     expect(datahub).to.respondTo('getStatus');
   });
 
-  it('should have the method upsertGroupCallback', function(){
+  it('should have the method createGroupCallback', function(){
     var datahub = new Datahub(config);
-    expect(datahub).to.respondTo('upsertGroupCallback');
+    expect(datahub).to.respondTo('createGroupCallback');
   });
 
   it('should have the method getGroupCallbacks', function(){
@@ -571,12 +571,12 @@ describe('node-datahub', function(){
   });
 
 
-  describe('upsertGroupCallback', function () {
+  describe('createGroupCallback', function () {
 
     it('should throw an Error if no group name is supplied', function (done) {
       var datahub = new Datahub(config);
       expect(function () {
-        datahub.upsertGroupCallback();
+        datahub.createGroupCallback();
       }).to.throw(Error);
       done();
     });
@@ -584,7 +584,7 @@ describe('node-datahub', function(){
     it('should throw an Error if no channel url is supplied', function (done) {
       var datahub = new Datahub(config);
       expect(function () {
-        datahub.upsertGroupCallback('testGroupCallback');
+        datahub.createGroupCallback('testGroupCallback');
       }).to.throw(Error);
       done();
     });
@@ -592,7 +592,7 @@ describe('node-datahub', function(){
     it('should throw an Error if no callback url is supplied', function (done) {
       var datahub = new Datahub(config);
       expect(function () {
-        datahub.upsertGroupCallback('testGroupCallback', testHubUrl + '/channel/testChannel');
+        datahub.createGroupCallback('testGroupCallback', testHubUrl + '/channel/testChannel');
       }).to.throw(Error);
       done();
     });
@@ -600,7 +600,7 @@ describe('node-datahub', function(){
     it('should throw an Error if no parallel calls is supplied', function (done) {
       var datahub = new Datahub(config);
       expect(function () {
-        datahub.upsertGroupCallback('testGroupCallback',
+        datahub.createGroupCallback('testGroupCallback',
           testHubUrl + '/channel/testChannel',
           'http://somewhere.com/callback');
       }).to.throw(Error);
@@ -625,7 +625,7 @@ describe('node-datahub', function(){
         });
 
       var datahub = new Datahub(config);
-      var promise = datahub.upsertGroupCallback('testGroupCallback',
+      var promise = datahub.createGroupCallback('testGroupCallback',
         testHubUrl + '/channel/testChannel',
         'http://somewhere.com/callback',
         10);
@@ -653,7 +653,7 @@ describe('node-datahub', function(){
         .reply(404, 'Simulating upsert group callback thrown error!');
 
       var datahub = new Datahub(config);
-      var promise = datahub.upsertGroupCallback('testGroupCallback',
+      var promise = datahub.createGroupCallback('testGroupCallback',
         testHubUrl + '/channel/testChannel',
         'http://somewhere.com/callback',
         10);
