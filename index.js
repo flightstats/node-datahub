@@ -18,6 +18,22 @@ function Datahub(config){
 Datahub.idPattern = /\/channel\/(?:.+)\/([0-9]+)/;
 Datahub.channelNamePattern = /\/channel\/([a-zA-Z0-9_]*)/;
 
+Datahub.prototype._get = function (url) {
+  var logger = this.config.logger;
+  return rp(url, {
+    method: 'GET',
+    json: true
+  })
+    .then(function (resp) {
+      logger.log('Retrieved hub data', url);
+      return resp;
+    })
+    .catch(function (err) {
+      logger.error('Error retrieving hub data ' + url, err.message);
+      return { statusCode: err.statusCode };
+    });
+};
+
 /*
   Channel(s) Operations
  */
@@ -89,7 +105,7 @@ Datahub.prototype.getChannel = function(name){
   }
 
   var url = this.config.url + '/channel/' + name;
-  return getHubData(this, url);
+  return this._get(url);
 };
 
 Datahub.prototype.deleteChannel = function(name){
@@ -158,7 +174,7 @@ Datahub.prototype.getContent = function(channelUrl){
     throw new Error("Missing channel URL");
   }
 
-  return getHubData(this, channelUrl);
+  return this._get(channelUrl);
 };
 
 Datahub.prototype.getStatus = function(name){
@@ -167,7 +183,7 @@ Datahub.prototype.getStatus = function(name){
   }
 
   var url = this.config.url + '/channel/' + name + '/status';
-  return getHubData(this, url);
+  return this._get(url);
 };
 
 Datahub.prototype.getLatest = function(name){
@@ -176,7 +192,7 @@ Datahub.prototype.getLatest = function(name){
   }
 
   var url = this.config.url + '/channel/' + name + '/latest';
-  return getHubData(this, url);
+  return this._get(url);
 };
 
 Datahub.prototype.getEarliest = function(name){
@@ -185,7 +201,7 @@ Datahub.prototype.getEarliest = function(name){
   }
 
   var url = this.config.url + '/channel/' + name + '/earliest';
-  return getHubData(this, url);
+  return this._get(url);
 };
 
 /*
@@ -257,7 +273,7 @@ Datahub.prototype.getGroupCallback = function(name){
   }
 
   var url = this.config.url + '/group/' + name;
-  return getHubData(this, url);
+  return this._get(url);
 };
 
 Datahub.prototype.deleteGroupCallback = function(name){
@@ -293,20 +309,5 @@ Datahub.prototype.parseChannelName = function(channelUrl){
 
   return '';
 };
-
-function getHubData(ctx, url) {
-  return rp(url, {
-    method: 'GET',
-    json: true
-  })
-    .then(function (resp) {
-      ctx.config.logger.log('Retrieved hub data', url);
-      return resp;
-    })
-    .catch(function (err) {
-      ctx.config.logger.error('Error retrieving hub data ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
-}
 
 module.exports = Datahub;
