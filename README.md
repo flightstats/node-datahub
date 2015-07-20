@@ -18,7 +18,7 @@ For more information about the FlightStats data hub : https://github.com/flights
 var Datahub = require('node-datahub');
 
 var datahub = new Datahub({
-    datahubUrl: <YOUR_DATAHUB_URL>
+    url: <YOUR_DATAHUB_URL>
 });
 
 datahub.getChannels()

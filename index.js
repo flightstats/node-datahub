@@ -6,17 +6,33 @@ var logger = console;
 
 function Datahub(config){
   this.config = _.assign({
-    datahubUrl: null,
+    url: null,
     logger: logger
   }, config);
 
-  if (_.isEmpty(this.config.datahubUrl)){
+  if (_.isEmpty(this.config.url)){
     throw new Error('Missing datahub URL');
   }
 }
 
 Datahub.idPattern = /\/channel\/(?:.+)\/([0-9]+)/;
 Datahub.channelNamePattern = /\/channel\/([a-zA-Z0-9_]*)/;
+
+Datahub.prototype._get = function (url) {
+  var logger = this.config.logger;
+  return rp(url, {
+    method: 'GET',
+    json: true
+  })
+    .then(function (resp) {
+      logger.log('Retrieved hub data', url);
+      return resp;
+    })
+    .catch(function (err) {
+      logger.error('Error retrieving hub data ' + url, err.message);
+      return { statusCode: err.statusCode };
+    });
+};
 
 /*
   Channel(s) Operations
@@ -28,7 +44,7 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/channel';
+  var url = this.config.url + '/channel';
   var data = { name: name };
   if (_.isNumber(ttlDays)) {
     data.ttlDays = ttlDays;
@@ -65,7 +81,7 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
 
 Datahub.prototype.getChannels = function(){
   var that = this;
-  var url = this.config.datahubUrl + '/channel';
+  var url = this.config.url + '/channel';
 
   return rp(url, {
     method: 'GET',
@@ -88,8 +104,8 @@ Datahub.prototype.getChannel = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name;
-  return getHubData(this, url);
+  var url = this.config.url + '/channel/' + name;
+  return this._get(url);
 };
 
 Datahub.prototype.deleteChannel = function(name){
@@ -98,7 +114,7 @@ Datahub.prototype.deleteChannel = function(name){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/channel/' + name;
+  var url = this.config.url + '/channel/' + name;
 
   return rp(url, {
     method: 'DELETE'
@@ -123,7 +139,7 @@ Datahub.prototype.addContent = function(name, content){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/channel/' + name;
+  var url = this.config.url + '/channel/' + name;
 
   return rp(url, {
     method: 'POST',
@@ -158,7 +174,7 @@ Datahub.prototype.getContent = function(channelUrl){
     throw new Error("Missing channel URL");
   }
 
-  return getHubData(this, channelUrl);
+  return this._get(channelUrl);
 };
 
 Datahub.prototype.getStatus = function(name){
@@ -166,8 +182,8 @@ Datahub.prototype.getStatus = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name + '/status';
-  return getHubData(this, url);
+  var url = this.config.url + '/channel/' + name + '/status';
+  return this._get(url);
 };
 
 Datahub.prototype.getLatest = function(name){
@@ -175,8 +191,8 @@ Datahub.prototype.getLatest = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name + '/latest';
-  return getHubData(this, url);
+  var url = this.config.url + '/channel/' + name + '/latest';
+  return this._get(url);
 };
 
 Datahub.prototype.getEarliest = function(name){
@@ -184,15 +200,15 @@ Datahub.prototype.getEarliest = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.datahubUrl + '/channel/' + name + '/earliest';
-  return getHubData(this, url);
+  var url = this.config.url + '/channel/' + name + '/earliest';
+  return this._get(url);
 };
 
 /*
   Group Callback Operations
  */
 
-Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, parallelCalls){
+Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, parallelCalls){
   if (!name){
     throw new Error("Missing group name");
   }
@@ -210,7 +226,7 @@ Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, 
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/group/' + name;
+  var url = this.config.url + '/group/' + name;
   var data = {
     channelUrl: channelUrl,
     callbackUrl: callbackUrl,
@@ -233,7 +249,7 @@ Datahub.prototype.upsertGroupCallback = function(name, channelUrl, callbackUrl, 
 
 Datahub.prototype.getGroupCallbacks = function(){
   var that = this;
-  var url = this.config.datahubUrl + '/group';
+  var url = this.config.url + '/group';
 
   return rp(url, {
     method: 'GET',
@@ -256,8 +272,8 @@ Datahub.prototype.getGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  var url = this.config.datahubUrl + '/group/' + name;
-  return getHubData(this, url);
+  var url = this.config.url + '/group/' + name;
+  return this._get(url);
 };
 
 Datahub.prototype.deleteGroupCallback = function(name){
@@ -266,7 +282,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
   }
 
   var that = this;
-  var url = this.config.datahubUrl + '/group/' + name;
+  var url = this.config.url + '/group/' + name;
 
   return rp(url, {
     method: 'DELETE'
@@ -293,20 +309,5 @@ Datahub.prototype.parseChannelName = function(channelUrl){
 
   return '';
 };
-
-function getHubData(ctx, url) {
-  return rp(url, {
-    method: 'GET',
-    json: true
-  })
-    .then(function (resp) {
-      ctx.config.logger.log('Retrieved hub data', url);
-      return resp;
-    })
-    .catch(function (err) {
-      ctx.config.logger.error('Error retrieving hub data ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
-}
 
 module.exports = Datahub;
