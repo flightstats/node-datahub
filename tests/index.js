@@ -8,13 +8,10 @@ var nock = require('nock');
 describe('node-datahub', function(){
 
   var testHubUrl = 'http://hub';
-  var config;
-
-  beforeEach(function(){
-    config = {
-      url: testHubUrl
-    };
-  });
+  var config = {
+    url: testHubUrl
+  };
+  var datahub = new Datahub(config);
 
   it('should throw an Error if no datahub url is supplied', function(){
     expect(function(){
@@ -30,173 +27,103 @@ describe('node-datahub', function(){
     }).to.not.throw(Error);
   });
 
-  it('should have the method createChannel', function(){
-    var datahub = new Datahub(config);
+  it('should have various CRUD methods', function(){
     expect(datahub).to.respondTo('createChannel');
-  });
-
-  it('should have the method getChannels', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getChannels');
-  });
-
-  it('should have the method getChannel', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getChannel');
-  });
-
-  it('should have the method deleteChannel', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('deleteChannel');
-  });
-
-  it('should have the method addContent', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('addContent');
-  });
-
-  it('should have the method getContent', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getContent');
-  });
-
-  it('should have the method getLatest', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getLatest');
-  });
-
-  it('should have the method getEarliest', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getEarliest');
-  });
-
-  it('should have the method getStatus', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getStatus');
-  });
-
-  it('should have the method createGroupCallback', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('createGroupCallback');
-  });
-
-  it('should have the method getGroupCallbacks', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getGroupCallbacks');
-  });
-
-  it('should have the method getGroupCallback', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('getGroupCallback');
-  });
-
-  it('should have the method deleteGroupCallback', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('deleteGroupCallback');
-  });
-
-  it('should have the method parseChannelName', function(){
-    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('parseChannelName');
   });
 
   describe('createChannel', function () {
 
+    var hubResponse = {
+      name: 'testChannel',
+      '_links': {
+        self: {
+          href: testHubUrl + '/channel/testChannel'
+        }
+      },
+      ttlDays: 10,
+      creationDate: '2015-07-01T13:30:00.00Z'
+    };
+
     it('should throw an Error if no channel name is supplied', function(done) {
-      var datahub = new Datahub(config);
       expect(function() {
         datahub.createChannel();
       }).to.throw(Error);
       done();
     });
 
-    it('should create a channel', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
-        .post('/channel', { name: 'testChannel', ttlDays: 10 })
-        .reply(200, {
-          name: 'testChannel',
-          '_links': {
-            self: {
-              href: testHubUrl + '/channel/testChannel'
-            }
-          },
-          ttlDays: 10,
-          creationDate: '2015-07-01T13:30:00.00Z'
-        });
+        .post('/channel', { name: 'testChannel', ttlDays: 10, description: 'testing', tags: [ 'test' ] })
+        .reply(200, hubResponse);
 
-      var datahub = new Datahub(config);
-      var promise = datahub.createChannel('testChannel', 10);
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('name' in result).to.eql(true);
-        expect(result.name).to.be.a('string');
-        expect('href' in result).to.eql(true);
-        expect(result.href).to.be.a('string');
-        expect('ttlDays' in result).to.eql(true);
-        expect(result.ttlDays).to.be.a('number');
-        expect('createdOn' in result).to.eql(true);
-        expect(result.createdOn).to.be.an.instanceof(Date);
-        done();
-      });
+      promiseResolved(datahub.createChannel('testChannel', 10, 'testing', [ 'test' ]), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .post('/channel', { name: 'testChannel', ttlDays: 10 })
+        .reply(200, hubResponse);
+
+      promiseResolved(datahub.createChannel('testChannel', '10'), done);
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .post('/channel', { name: 'testChannel' })
+        .reply(200, hubResponse);
+
+      promiseResolved(datahub.createChannel('testChannel', {}), done);
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .post('/channel', { name: 'testChannel' })
+        .reply(200, hubResponse);
+
+      promiseResolved(datahub.createChannel('testChannel', 'test'), done);
+    });
+
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .post('/channel', { name: 'testChannel', ttlDays: 10 })
         .reply(409, 'Simulating create channel thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.createChannel('testChannel', 10);
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.createChannel('testChannel', 10), done);
     });
 
   });
 
   describe('getChannels', function () {
 
-    it('should retrieve an array of channels', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel')
         .reply(200, { '_links': {
           channels: []
         }});
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getChannels();
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('Array');
-        done();
-      });
+      promiseResolved(datahub.getChannels(), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .get('/channel')
         .reply(404, 'Simulating get channels thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getChannels();
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.getChannels(), done);
     });
 
   });
@@ -204,44 +131,26 @@ describe('node-datahub', function(){
   describe('getChannel', function () {
 
     it('should throw an Error if no channel name is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.getChannel();
       }).to.throw(Error);
       done();
     });
 
-    it('should get a channel', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel')
         .reply(200, {});
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getChannel('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        done();
-      });
+      promiseResolved(datahub.getChannel('testChannel'), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel')
         .reply(404, 'Simulating get channel thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getChannel('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.getChannel('testChannel'), done)
     });
 
   });
@@ -249,45 +158,26 @@ describe('node-datahub', function(){
   describe('deleteChannel', function () {
 
     it('should throw an Error if no channel name is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.deleteChannel();
       }).to.throw(Error);
       done();
     });
 
-    it('should delete a channel', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .delete('/channel/testChannel')
         .reply(202);
 
-      var datahub = new Datahub(config);
-      var promise = datahub.deleteChannel('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('number');
-        expect(result).to.eql(202);
-        done();
-      });
+      promiseResolved(datahub.deleteChannel('testChannel'), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .delete('/channel/testChannel')
         .reply(404, 'Simulating delete channel thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.deleteChannel('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.deleteChannel('testChannel'), done);
     });
 
   });
@@ -295,7 +185,6 @@ describe('node-datahub', function(){
   describe('addContent', function () {
 
     it('should throw an Error if no channel name is supplied', function(done) {
-      var datahub = new Datahub(config);
       expect(function() {
         datahub.addContent();
       }).to.throw(Error);
@@ -303,14 +192,13 @@ describe('node-datahub', function(){
     });
 
     it('should throw an Error if no content is supplied', function(done) {
-      var datahub = new Datahub(config);
       expect(function() {
         datahub.addContent('testChannel');
       }).to.throw(Error);
       done();
     });
 
-    it('should add content', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .post('/channel/testChannel', { foo: 'bar' })
         .reply(200, {
@@ -323,64 +211,15 @@ describe('node-datahub', function(){
           timestamp: '2015-07-01T13:30:00.00Z'
         });
 
-      var datahub = new Datahub(config);
-      var promise = datahub.addContent('testChannel', { foo: 'bar' });
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('url' in result).to.eql(true);
-        expect(result.url).to.be.a('string');
-        expect('content' in result).to.eql(true);
-        expect(result.content).to.be.an('object');
-        expect('createdOn' in result).to.eql(true);
-        expect(result.createdOn).to.be.an.instanceof(Date);
-        done();
-      });
+      promiseResolved(datahub.addContent('testChannel', { foo: 'bar' }), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
-      nock(testHubUrl)
-        .post('/channel/testChannel', { foo: 'bar' })
-        .reply(200, {
-          '_links': {
-            self: {
-              href: testHubUrl + '/channel/testChannel/aaa'
-            }
-          },
-          content: { foo: 'bar' },
-          timestamp: '2015-07-01T13:30:00.00Z'
-        });
-
-      var datahub = new Datahub(config);
-      var promise = datahub.addContent('testChannel', { foo: 'bar' });
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
-    });
-
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .post('/channel/testChannel', { foo: 'bar' })
         .reply(404, 'Simulating add content thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.addContent('testChannel', { foo: 'bar' });
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.addContent('testChannel', { foo: 'bar' }), done);
     });
 
   });
@@ -388,137 +227,26 @@ describe('node-datahub', function(){
   describe('getContent', function () {
 
     it('should throw an Error if no channel url is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.getContent();
       }).to.throw(Error);
       done();
     });
 
-    it('should get content', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel')
         .reply(200, { foo: 'bar' });
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getContent(testHubUrl + '/channel/testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('foo' in result).to.eql(true);
-        done();
-      });
+      promiseResolved(datahub.getContent(testHubUrl + '/channel/testChannel'), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel')
         .reply(404, 'Simulating get content thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getContent(testHubUrl + '/channel/testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
-    });
-
-  });
-
-  describe('getLatest', function () {
-
-    it('should throw an Error if no channel name is supplied', function (done) {
-      var datahub = new Datahub(config);
-      expect(function () {
-        datahub.getLatest();
-      }).to.throw(Error);
-      done();
-    });
-
-    it('should get latest', function(done) {
-      nock(testHubUrl)
-        .get('/channel/testChannel/latest')
-        .reply(200, { foo: 'bar' });
-
-      var datahub = new Datahub(config);
-      var promise = datahub.getLatest('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('foo' in result).to.eql(true);
-        done();
-      });
-    });
-
-    it('should return an HTTP status code between 400-599', function(done) {
-      nock(testHubUrl)
-        .get('/channel/testChannel/latest')
-        .reply(404, 'Simulating get latest thrown error!');
-
-      var datahub = new Datahub(config);
-      var promise = datahub.getLatest('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
-    });
-
-  });
-
-  describe('getEarliest', function () {
-
-    it('should throw an Error if no channel name is supplied', function (done) {
-      var datahub = new Datahub(config);
-      expect(function () {
-        datahub.getEarliest();
-      }).to.throw(Error);
-      done();
-    });
-
-    it('should get earliest', function(done) {
-      nock(testHubUrl)
-        .get('/channel/testChannel/earliest')
-        .reply(200, { foo: 'bar' });
-
-      var datahub = new Datahub(config);
-      var promise = datahub.getEarliest('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('foo' in result).to.eql(true);
-        done();
-      });
-    });
-
-    it('should return an HTTP status code between 400-599', function(done) {
-      nock(testHubUrl)
-        .get('/channel/testChannel/earliest')
-        .reply(404, 'Simulating get earliest thrown error!');
-
-      var datahub = new Datahub(config);
-      var promise = datahub.getEarliest('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.getContent(testHubUrl + '/channel/testChannel'), done);
     });
 
   });
@@ -526,55 +254,87 @@ describe('node-datahub', function(){
   describe('getStatus', function () {
 
     it('should throw an Error if no channel name is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.getStatus();
       }).to.throw(Error);
       done();
     });
 
-    it('should get status', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel/status')
         .reply(200, { "_links": { "latest": { "href": "..." } } });
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getStatus('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('_links' in result).to.eql(true);
-        expect('latest' in result["_links"]).to.eql(true);
-        done();
-      });
+      promiseResolved(datahub.getStatus('testChannel'), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel/status')
         .reply(404, 'Simulating get status thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getStatus('testChannel');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.getStatus('testChannel'), done);
     });
 
   });
 
+  describe('getLatest', function () {
+
+    it('should throw an Error if no channel name is supplied', function (done) {
+      expect(function () {
+        datahub.getLatest();
+      }).to.throw(Error);
+      done();
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/latest')
+        .reply(200, { foo: 'bar' });
+
+      promiseResolved(datahub.getLatest('testChannel'), done);
+    });
+
+    it('should return rejected promise', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/latest')
+        .reply(404, 'Simulating get latest thrown error!');
+
+      promiseRejected(datahub.getLatest('testChannel'), done);
+    });
+
+  });
+
+  describe('getEarliest', function () {
+
+    it('should throw an Error if no channel name is supplied', function (done) {
+      expect(function () {
+        datahub.getEarliest();
+      }).to.throw(Error);
+      done();
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/earliest')
+        .reply(200, { foo: 'bar' });
+
+      promiseResolved(datahub.getEarliest('testChannel'), done);
+    });
+
+    it('should return rejected promise', function(done) {
+      nock(testHubUrl)
+        .get('/channel/testChannel/earliest')
+        .reply(404, 'Simulating get earliest thrown error!');
+
+      promiseRejected(datahub.getEarliest('testChannel'), done);
+    });
+
+  });
 
   describe('createGroupCallback', function () {
 
     it('should throw an Error if no group name is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.createGroupCallback();
       }).to.throw(Error);
@@ -582,7 +342,6 @@ describe('node-datahub', function(){
     });
 
     it('should throw an Error if no channel url is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.createGroupCallback('testGroupCallback');
       }).to.throw(Error);
@@ -590,7 +349,6 @@ describe('node-datahub', function(){
     });
 
     it('should throw an Error if no callback url is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.createGroupCallback('testGroupCallback', testHubUrl + '/channel/testChannel');
       }).to.throw(Error);
@@ -598,7 +356,6 @@ describe('node-datahub', function(){
     });
 
     it('should throw an Error if no parallel calls is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.createGroupCallback('testGroupCallback',
           testHubUrl + '/channel/testChannel',
@@ -607,7 +364,7 @@ describe('node-datahub', function(){
       done();
     });
 
-    it('should upsert group callback', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
@@ -624,87 +381,47 @@ describe('node-datahub', function(){
           parallelCalls: 10
         });
 
-      var datahub = new Datahub(config);
-      var promise = datahub.createGroupCallback('testGroupCallback',
+      promiseResolved(datahub.createGroupCallback('testGroupCallback',
         testHubUrl + '/channel/testChannel',
         'http://somewhere.com/callback',
-        10);
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('name' in result).to.eql(true);
-        expect(result.name).to.be.a('string');
-        expect('_links' in result).to.eql(true);
-        expect(result['_links']).to.be.an('object');
-        expect('parallelCalls' in result).to.eql(true);
-        expect(result.parallelCalls).to.be.a('number');
-        done();
-      });
+        10), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10
         })
-        .reply(404, 'Simulating upsert group callback thrown error!');
+        .reply(404, 'Simulating create group callback thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.createGroupCallback('testGroupCallback',
+      promiseRejected(datahub.createGroupCallback('testGroupCallback',
         testHubUrl + '/channel/testChannel',
         'http://somewhere.com/callback',
-        10);
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+        10), done);
     });
 
   });
 
   describe('getGroupCallbacks', function () {
 
-    it('should retrieve an array of group callbacks', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/group')
         .reply(200, { '_links': {
           groups: []
         }});
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getGroupCallbacks();
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('Array');
-        done();
-      });
+      promiseResolved(datahub.getGroupCallbacks(), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .get('/group')
         .reply(404, 'Simulating get group callbacks thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getGroupCallbacks();
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.getGroupCallbacks(), done);
     });
 
   });
@@ -712,44 +429,26 @@ describe('node-datahub', function(){
   describe('getGroupCallback', function () {
 
     it('should throw an Error if no group callback name is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.getGroupCallback();
       }).to.throw(Error);
       done();
     });
 
-    it('should get a group callback', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/group/testGroupCallback')
         .reply(200, {});
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getGroupCallback('testGroupCallback');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        done();
-      });
+      promiseResolved(datahub.getGroupCallback('testGroupCallback'), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .get('/group/testGroupCallback')
         .reply(404, 'Simulating get group callback thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.getGroupCallback('testGroupCallback');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.getGroupCallback('testGroupCallback'), done);
     });
 
   });
@@ -757,45 +456,26 @@ describe('node-datahub', function(){
   describe('deleteGroupCallback', function () {
 
     it('should throw an Error if no group callback name is supplied', function (done) {
-      var datahub = new Datahub(config);
       expect(function () {
         datahub.deleteGroupCallback();
       }).to.throw(Error);
       done();
     });
 
-    it('should delete a group callback', function(done) {
+    it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .delete('/group/testGroupCallback')
         .reply(202);
 
-      var datahub = new Datahub(config);
-      var promise = datahub.deleteGroupCallback('testGroupCallback');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('number');
-        expect(result).to.eql(202);
-        done();
-      });
+      promiseResolved(datahub.deleteGroupCallback('testGroupCallback'), done);
     });
 
-    it('should return an HTTP status code between 400-599', function(done) {
+    it('should return rejected promise', function(done) {
       nock(testHubUrl)
         .delete('/group/testGroupCallback')
         .reply(404, 'Simulating delete group callback thrown error!');
 
-      var datahub = new Datahub(config);
-      var promise = datahub.deleteGroupCallback('testGroupCallback');
-      expect(promise).to.respondTo('then');
-
-      promise.then(function(result) {
-        expect(result).to.be.an('object');
-        expect('statusCode' in result).to.eql(true);
-        expect(result.statusCode).to.be.above(399);
-        expect(result.statusCode).to.be.below(600);
-        done();
-      });
+      promiseRejected(datahub.deleteGroupCallback('testGroupCallback'), done);
     });
 
   });
@@ -803,14 +483,12 @@ describe('node-datahub', function(){
   describe('parseChannelName', function () {
 
     it('should return an empty string', function (done) {
-      var datahub = new Datahub(config);
       expect(datahub.parseChannelName()).to.eql('');
       done();
     });
 
     it('should return a channel name', function (done) {
       var testChannel = testHubUrl + '/channel/testChannel';
-      var datahub = new Datahub(config);
       expect(datahub.parseChannelName(testChannel)).to.eql('testChannel');
       done();
     });
@@ -818,3 +496,23 @@ describe('node-datahub', function(){
   });
 
 });
+
+function promiseResolved (promise, done) {
+  expect(promise).to.respondTo('then');
+
+  promise.then(function(resp) {
+    done();
+  }, function (err) {
+    throw err;
+  });
+}
+
+function promiseRejected (promise, done) {
+  expect(promise).to.respondTo('then');
+
+  promise.then(function(resp) {
+    throw new Error('expected failure, but succeeded instead');
+  }, function (err) {
+    done();
+  });
+}

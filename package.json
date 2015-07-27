@@ -20,6 +20,7 @@
   "author": "Chris Wood",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^2.9.34",
     "lodash": "^3.9.3",
     "request-promise": "^0.4.2"
   },
