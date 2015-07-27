@@ -42,7 +42,6 @@ describe('node-datahub', function(){
     expect(datahub).to.respondTo('getGroupCallbacks');
     expect(datahub).to.respondTo('getGroupCallback');
     expect(datahub).to.respondTo('deleteGroupCallback');
-    expect(datahub).to.respondTo('parseChannelName');
   });
 
   describe('createChannel', function () {
@@ -531,21 +530,6 @@ describe('node-datahub', function(){
         .reply(404, 'Simulating delete group callback thrown error!');
 
       promiseRejected(datahub.deleteGroupCallback('testGroupCallback'), done);
-    });
-
-  });
-
-  describe('parseChannelName', function () {
-
-    it('should return an empty string', function (done) {
-      expect(datahub.parseChannelName()).to.eql('');
-      done();
-    });
-
-    it('should return a channel name', function (done) {
-      var testChannel = testHubUrl + '/channel/testChannel';
-      expect(datahub.parseChannelName(testChannel)).to.eql('testChannel');
-      done();
     });
 
   });
