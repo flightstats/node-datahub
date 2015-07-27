@@ -13,33 +13,17 @@ function Datahub(config){
   }
 }
 
-Datahub.channelNamePattern = /\/channel\/([a-zA-Z0-9_]*)/;
+Datahub.prototype._crud = function (url, method, data) {
+  var options = {
+    method: method
+  };
+  if (method === 'GET') {
+    options.json = true;
+  } else if (method === 'POST' || method === 'PUT') {
+    options.json = data;
+  }
 
-Datahub.prototype._get = function (url) {
-  return rp(url, {
-    method: 'GET',
-    json: true
-  });
-};
-
-Datahub.prototype._post = function (url, data) {
-  return rp(url, {
-    method: 'POST',
-    json: data
-  });
-};
-
-Datahub.prototype._put = function (url, data) {
-  return rp(url, {
-    method: 'PUT',
-    json: data
-  });
-};
-
-Datahub.prototype._delete = function (url) {
-  return rp(url, {
-    method: 'DELETE'
-  });
+  return rp(url, options);
 };
 
 /*
@@ -64,11 +48,11 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   if (description) { data.description = description; }
   if (tags) { data.tags = tags; }
 
-  return this._post(this.config.url + '/channel', data);
+  return this._crud(this.config.url + '/channel', 'POST', data);
 };
 
 Datahub.prototype.getChannels = function(){
-  return this._get(this.config.url + '/channel');
+  return this._crud(this.config.url + '/channel', 'GET');
 };
 
 Datahub.prototype.getChannel = function(name){
@@ -76,7 +60,7 @@ Datahub.prototype.getChannel = function(name){
     throw new Error("Missing channel name");
   }
 
-  return this._get(this.config.url + '/channel/' + name);
+  return this._crud(this.config.url + '/channel/' + name, 'GET');
 };
 
 Datahub.prototype.deleteChannel = function(name){
@@ -84,7 +68,7 @@ Datahub.prototype.deleteChannel = function(name){
     throw new Error("Missing channel name");
   }
 
-  return this._delete(this.config.url + '/channel/' + name);
+  return this._crud(this.config.url + '/channel/' + name, 'DELETE');
 };
 
 Datahub.prototype.addContent = function(name, content){
@@ -96,7 +80,7 @@ Datahub.prototype.addContent = function(name, content){
     throw new Error("Missing content");
   }
 
-  return this._post(this.config.url + '/channel/' + name, content);
+  return this._crud(this.config.url + '/channel/' + name, 'POST', content);
 };
 
 Datahub.prototype.getContent = function(channelUrl){
@@ -104,7 +88,7 @@ Datahub.prototype.getContent = function(channelUrl){
     throw new Error("Missing channel URL");
   }
 
-  return this._get(channelUrl);
+  return this._crud(channelUrl, 'GET');
 };
 
 Datahub.prototype.getStatus = function(name){
@@ -112,7 +96,7 @@ Datahub.prototype.getStatus = function(name){
     throw new Error("Missing channel name");
   }
 
-  return this._get(this.config.url + '/channel/' + name + '/status');
+  return this._crud(this.config.url + '/channel/' + name + '/status', 'GET');
 };
 
 Datahub.prototype.getLatest = function(name){
@@ -120,7 +104,7 @@ Datahub.prototype.getLatest = function(name){
     throw new Error("Missing channel name");
   }
 
-  return this._get(this.config.url + '/channel/' + name + '/latest');
+  return this._crud(this.config.url + '/channel/' + name + '/latest', 'GET');
 };
 
 Datahub.prototype.getEarliest = function(name){
@@ -128,7 +112,7 @@ Datahub.prototype.getEarliest = function(name){
     throw new Error("Missing channel name");
   }
 
-  return this._get(this.config.url + '/channel/' + name + '/earliest');
+  return this._crud(this.config.url + '/channel/' + name + '/earliest', 'GET');
 };
 
 /*
@@ -158,11 +142,11 @@ Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, 
     parallelCalls: parallelCalls
   };
 
-  return this._put(this.config.url + '/group/' + name, data);
+  return this._crud(this.config.url + '/group/' + name, 'PUT', data);
 };
 
 Datahub.prototype.getGroupCallbacks = function(){
-  return this._get(this.config.url + '/group');
+  return this._crud(this.config.url + '/group', 'GET');
 };
 
 Datahub.prototype.getGroupCallback = function(name){
@@ -170,7 +154,7 @@ Datahub.prototype.getGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  return this._get(this.config.url + '/group/' + name);
+  return this._crud(this.config.url + '/group/' + name, 'GET');
 };
 
 Datahub.prototype.deleteGroupCallback = function(name){
@@ -178,20 +162,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  return this._delete(this.config.url + '/group/' + name);
-};
-
-
-/*
-  Helpers
- */
-
-Datahub.prototype.parseChannelName = function(channelUrl){
-  if (channelUrl && _.isString(channelUrl)) {
-    return channelUrl.match(Datahub.channelNamePattern)[1];
-  }
-
-  return '';
+  return this._crud(this.config.url + '/group/' + name, 'DELETE');
 };
 
 module.exports = Datahub;
