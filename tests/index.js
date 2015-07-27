@@ -8,6 +8,7 @@ var nock = require('nock');
 describe('node-datahub', function(){
 
   var testHubUrl = 'http://hub';
+  var testWSHubUrl = 'ws://hub';
   var config = {
     url: testHubUrl
   };
@@ -47,14 +48,32 @@ describe('node-datahub', function(){
   describe('createChannel', function () {
 
     var hubResponse = {
-      name: 'testChannel',
       '_links': {
         self: {
           href: testHubUrl + '/channel/testChannel'
+        },
+        latest: {
+          href: testHubUrl + '/channel/testChannel/latest'
+        },
+        earliest: {
+          href: testHubUrl + '/channel/testChannel/earliest'
+        },
+        ws: {
+          href: testWSHubUrl + '/channel/testChannel/ws'
+        },
+        time: {
+          href: testHubUrl + '/channel/testChannel/time'
+        },
+        status : {
+          href : testHubUrl + '/channel/testChannel/status'
         }
       },
+      name: 'testChannel',
+      creationDate: '2015-07-01T13:30:00.00Z',
       ttlDays: 10,
-      creationDate: '2015-07-01T13:30:00.00Z'
+      description: 'testing this channel',
+      tags: [ 'test1', 'test2'],
+      replicationSource: ''
     };
 
     it('should throw an Error if no channel name is supplied', function(done) {
@@ -108,12 +127,18 @@ describe('node-datahub', function(){
 
   describe('getChannels', function () {
 
+    var hubResponse = { '_links': {
+      self: { href: testHubUrl + '/channel' },
+      channels: [ {
+        name: 'testing123',
+        href: testHubUrl + '/channel/testing123'
+      } ]
+    } };
+
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel')
-        .reply(200, { '_links': {
-          channels: []
-        }});
+        .reply(200, hubResponse);
 
       promiseResolved(datahub.getChannels(), done);
     });
@@ -130,6 +155,36 @@ describe('node-datahub', function(){
 
   describe('getChannel', function () {
 
+    var hubResponse = {
+      name: 'testChannel',
+      creationDate: '2015-05-06T20:32:10.333Z',
+      ttlDays: 60,
+      maxItems: 0,
+      description: '',
+      tags: [ ],
+      replicationSource: '',
+      _links: {
+        self: {
+          href: testHubUrl + '/channel/testChannel'
+        },
+        latest: {
+          href: testHubUrl + '/channel/testChannel/latest'
+        },
+        earliest: {
+          href: testHubUrl + '/channel/testChannel/earliest'
+        },
+        ws: {
+          href: testWSHubUrl + '/channel/testChannel/ws'
+        },
+        time: {
+          href: testHubUrl + '/channel/testChannel/time'
+        },
+        status: {
+          href: testHubUrl + '/channel/testChannel/status'
+        }
+      }
+    };
+
     it('should throw an Error if no channel name is supplied', function (done) {
       expect(function () {
         datahub.getChannel();
@@ -140,7 +195,7 @@ describe('node-datahub', function(){
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel')
-        .reply(200, {});
+        .reply(200, hubResponse);
 
       promiseResolved(datahub.getChannel('testChannel'), done);
     });
@@ -263,7 +318,7 @@ describe('node-datahub', function(){
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel/status')
-        .reply(200, { "_links": { "latest": { "href": "..." } } });
+        .reply(200, { '_links': { 'latest': { 'href': '...' } } });
 
       promiseResolved(datahub.getStatus('testChannel'), done);
     });
