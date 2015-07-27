@@ -1,6 +1,5 @@
 'use strict';
 
-var Promise = require('bluebird');
 var _ = require('lodash');
 var rp = require('request-promise');
 var logger = console;
