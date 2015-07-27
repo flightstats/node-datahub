@@ -6,8 +6,7 @@ var logger = console;
 
 function Datahub(config){
   this.config = _.assign({
-    url: null,
-    logger: logger
+    url: null
   }, config);
 
   if (_.isEmpty(this.config.url)){
@@ -15,23 +14,33 @@ function Datahub(config){
   }
 }
 
-Datahub.idPattern = /\/channel\/(?:.+)\/([0-9]+)/;
 Datahub.channelNamePattern = /\/channel\/([a-zA-Z0-9_]*)/;
 
 Datahub.prototype._get = function (url) {
-  var logger = this.config.logger;
   return rp(url, {
     method: 'GET',
     json: true
-  })
-    .then(function (resp) {
-      logger.log('Retrieved hub data', url);
-      return resp;
-    })
-    .catch(function (err) {
-      logger.error('Error retrieving hub data ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  });
+};
+
+Datahub.prototype._post = function (url, data) {
+  return rp(url, {
+    method: 'POST',
+    json: data
+  });
+};
+
+Datahub.prototype._put = function (url, data) {
+  return rp(url, {
+    method: 'PUT',
+    json: data
+  });
+};
+
+Datahub.prototype._delete = function (url) {
+  return rp(url, {
+    method: 'DELETE'
+  });
 };
 
 /*
@@ -43,60 +52,24 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
     throw new Error("Missing channel name");
   }
 
-  var that = this;
-  var url = this.config.url + '/channel';
   var data = { name: name };
   if (_.isNumber(ttlDays)) {
     data.ttlDays = ttlDays;
   }
   else if (_.isString(ttlDays)){
     ttlDays = parseInt(ttlDays, 10);
-    if (_.isNumber(ttlDays)){
+    if (ttlDays){
       data.ttlDays = ttlDays;
     }
   }
   if (description) { data.description = description; }
   if (tags) { data.tags = tags; }
 
-  return rp(url, {
-    method: 'POST',
-    json: data
-  })
-    .then(function(resp){
-      var created = {
-        name: resp.name,
-        href: resp._links.self.href,
-        ttlDays: parseInt(resp.ttlDays, 10),
-        createdOn: new Date(resp.creationDate)
-      };
-
-      that.config.logger.log('Created hub channel', created);
-      return created;
-    })
-    .catch(function(err){
-      that.config.logger.error('Error created hub channel', err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._post(this.config.url + '/channel', data);
 };
 
 Datahub.prototype.getChannels = function(){
-  var that = this;
-  var url = this.config.url + '/channel';
-
-  return rp(url, {
-    method: 'GET',
-    json: true
-  })
-    .then(function(resp){
-      var channels = resp._links.channels || [];
-
-      that.config.logger.log('Retrieved hub channels on ' + url, channels.length + ' channels found');
-      return channels;
-    })
-    .catch(function(err){
-      that.config.logger.error('Error retrieving hub channels on ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._get(this.config.url + '/channel');
 };
 
 Datahub.prototype.getChannel = function(name){
@@ -104,8 +77,7 @@ Datahub.prototype.getChannel = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.url + '/channel/' + name;
-  return this._get(url);
+  return this._get(this.config.url + '/channel/' + name);
 };
 
 Datahub.prototype.deleteChannel = function(name){
@@ -113,20 +85,7 @@ Datahub.prototype.deleteChannel = function(name){
     throw new Error("Missing channel name");
   }
 
-  var that = this;
-  var url = this.config.url + '/channel/' + name;
-
-  return rp(url, {
-    method: 'DELETE'
-  })
-    .then(function (/*resp*/) {
-      that.config.logger.log('Deleted hub channel', url);
-      return 202;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error deleting hub channel ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._delete(this.config.url + '/channel/' + name);
 };
 
 Datahub.prototype.addContent = function(name, content){
@@ -138,35 +97,7 @@ Datahub.prototype.addContent = function(name, content){
     throw new Error("Missing content");
   }
 
-  var that = this;
-  var url = this.config.url + '/channel/' + name;
-
-  return rp(url, {
-    method: 'POST',
-    json: content
-  })
-    .then(function(resp){
-      var payload = {
-        url: resp._links.self.href,
-        content: content,
-        createdOn: new Date(resp.timestamp)
-      };
-
-      var idMatch = resp._links.self.href.match(Datahub.idPattern);
-      if (idMatch){
-        payload.id = parseInt(idMatch[1]);
-      } else {
-        that.config.logger.error('Could not determine the payload id while adding hub content', url);
-        return { statusCode: 500 };
-      }
-
-      that.config.logger.log('Posted content on hub channel', url);
-      return payload;
-    })
-    .catch(function(err){
-      that.config.logger.error('Error posting content on hub channel ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._post(this.config.url + '/channel/' + name, content);
 };
 
 Datahub.prototype.getContent = function(channelUrl){
@@ -182,8 +113,7 @@ Datahub.prototype.getStatus = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.url + '/channel/' + name + '/status';
-  return this._get(url);
+  return this._get(this.config.url + '/channel/' + name + '/status');
 };
 
 Datahub.prototype.getLatest = function(name){
@@ -191,8 +121,7 @@ Datahub.prototype.getLatest = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.url + '/channel/' + name + '/latest';
-  return this._get(url);
+  return this._get(this.config.url + '/channel/' + name + '/latest');
 };
 
 Datahub.prototype.getEarliest = function(name){
@@ -200,8 +129,7 @@ Datahub.prototype.getEarliest = function(name){
     throw new Error("Missing channel name");
   }
 
-  var url = this.config.url + '/channel/' + name + '/earliest';
-  return this._get(url);
+  return this._get(this.config.url + '/channel/' + name + '/earliest');
 };
 
 /*
@@ -225,46 +153,17 @@ Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, 
     throw new Error("Missing number of parallel calls");
   }
 
-  var that = this;
-  var url = this.config.url + '/group/' + name;
   var data = {
     channelUrl: channelUrl,
     callbackUrl: callbackUrl,
     parallelCalls: parallelCalls
   };
 
-  return rp(url, {
-    method: 'PUT',
-    json: data
-  })
-    .then(function (resp) {
-      that.config.logger.log('Created hub group callback', { url: url, data: data });
-      return resp;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error creating hub group callback for ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._put(this.config.url + '/group/' + name, data);
 };
 
 Datahub.prototype.getGroupCallbacks = function(){
-  var that = this;
-  var url = this.config.url + '/group';
-
-  return rp(url, {
-    method: 'GET',
-    json: true
-  })
-    .then(function (resp) {
-      var groups = resp._links.groups || [];
-
-      that.config.logger.log('Retrieved hub group callbacks on ' + url, groups.length + ' group callbacks found');
-      return groups;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error retrieving hub group callbacks on ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._get(this.config.url + '/group');
 };
 
 Datahub.prototype.getGroupCallback = function(name){
@@ -272,8 +171,7 @@ Datahub.prototype.getGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  var url = this.config.url + '/group/' + name;
-  return this._get(url);
+  return this._get(this.config.url + '/group/' + name);
 };
 
 Datahub.prototype.deleteGroupCallback = function(name){
@@ -281,20 +179,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
     throw new Error("Missing group name");
   }
 
-  var that = this;
-  var url = this.config.url + '/group/' + name;
-
-  return rp(url, {
-    method: 'DELETE'
-  })
-    .then(function (/*resp*/) {
-      that.config.logger.log('Deleted hub group callback', url);
-      return 202;
-    })
-    .catch(function (err) {
-      that.config.logger.error('Error deleting group callback ' + url, err.message);
-      return { statusCode: err.statusCode };
-    });
+  return this._delete(this.config.url + '/group/' + name);
 };
 
 
