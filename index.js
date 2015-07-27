@@ -2,7 +2,6 @@
 
 var _ = require('lodash');
 var rp = require('request-promise');
-var logger = console;
 
 function Datahub(config){
   this.config = _.assign({
