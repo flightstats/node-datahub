@@ -17,6 +17,11 @@ Datahub.prototype._crud = function (url, method, data) {
   var options = {
     method: method
   };
+
+  if (this.config.requestPromiseOptions) {
+    options = _.assign(options, this.config.requestPromiseOptions);
+  }
+  
   if (method === 'GET') {
     options.json = true;
   } else if (method === 'POST' || method === 'PUT') {
@@ -88,7 +93,7 @@ Datahub.prototype.getContent = function(channelUrl){
     throw new Error("Missing channel URL");
   }
 
-  return this._crud(channelUrl, 'GET');
+  return this._crud(this.config.url + channelUrl, 'GET');
 };
 
 Datahub.prototype.getStatus = function(name){
