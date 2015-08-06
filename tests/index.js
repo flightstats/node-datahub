@@ -292,7 +292,7 @@ describe('node-datahub', function(){
         .get('/channel/testChannel')
         .reply(200, { foo: 'bar' });
 
-      promiseResolved(datahub.getContent(testHubUrl + '/channel/testChannel'), done);
+      promiseResolved(datahub.getContent('/channel/testChannel'), done);
     });
 
     it('should return rejected promise', function(done) {
@@ -300,7 +300,7 @@ describe('node-datahub', function(){
         .get('/channel/testChannel')
         .reply(404, 'Simulating get content thrown error!');
 
-      promiseRejected(datahub.getContent(testHubUrl + '/channel/testChannel'), done);
+      promiseRejected(datahub.getContent('/channel/testChannel'), done);
     });
 
   });
