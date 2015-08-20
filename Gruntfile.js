@@ -13,6 +13,7 @@ module.exports = function (grunt) {
     },
 
     clean: {
+      docs: ['./docs'],
       node: ['./node_modules'],
       coverage: {
         src: ['./coverage']
@@ -55,11 +56,20 @@ module.exports = function (grunt) {
           return cmd;
         }
       }
+    },
+    jsdoc: {
+      dist: {
+        src: ['*.js', '!Gruntfile.js'],
+        options: {
+          destination: 'docs'
+        }
+      }
     }
+
   });
 
   grunt.registerTask('coverage', ['clean:coverage', 'env:test', 'exec:istanbul']);
-
+  grunt.registerTask('docs', [ 'clean:docs', 'jsdoc' ]);
   grunt.registerTask('test', 'Run Tests', function () {
     grunt.task.run(['env:test', 'exec:mocha']);
   });
