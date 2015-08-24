@@ -8,6 +8,7 @@ var rp = require('request-promise');
  * @constructor
  * @param {Object} config - configuration object
  * @param {string} config.url - datahub url
+ * @param {Object} [config.requestPromiseOptions] - options passed to request-promise
  *
  * @example
  *    new Datahub({
@@ -43,10 +44,9 @@ Datahub.prototype._crud = function (url, method, data) {
   return rp(url, options);
 };
 
-/*
-  Channel(s) Operations
- */
-
+/**
+* create a new channel
+*/
 Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   if (!name){
     throw new Error('Missing channel name');
@@ -67,10 +67,16 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   return this._crud(this.config.url + '/channel', 'POST', data);
 };
 
+/**
+ * get a list of channels
+ */
 Datahub.prototype.getChannels = function(){
   return this._crud(this.config.url + '/channel', 'GET');
 };
 
+/**
+ * get a specific channel
+ */
 Datahub.prototype.getChannel = function(name){
   if (!name){
     throw new Error('Missing channel name');
@@ -79,6 +85,9 @@ Datahub.prototype.getChannel = function(name){
   return this._crud(this.config.url + '/channel/' + name, 'GET');
 };
 
+/**
+ * delete a specific channel
+ */
 Datahub.prototype.deleteChannel = function(name){
   if (!name){
     throw new Error('Missing channel name');
@@ -87,6 +96,9 @@ Datahub.prototype.deleteChannel = function(name){
   return this._crud(this.config.url + '/channel/' + name, 'DELETE');
 };
 
+/**
+ * add content to a channel
+ */
 Datahub.prototype.addContent = function(name, content){
   if (!name){
     throw new Error('Missing channel name');
@@ -99,6 +111,9 @@ Datahub.prototype.addContent = function(name, content){
   return this._crud(this.config.url + '/channel/' + name, 'POST', content);
 };
 
+/**
+ * get channel content
+ */
 Datahub.prototype.getContent = function(channelUrl){
   if (!channelUrl){
     throw new Error('Missing channel URL');
@@ -107,6 +122,9 @@ Datahub.prototype.getContent = function(channelUrl){
   return this._crud(this.config.url + channelUrl, 'GET');
 };
 
+/**
+ * get channel status
+ */
 Datahub.prototype.getStatus = function(name){
   if (!name){
     throw new Error('Missing channel name');
@@ -115,6 +133,9 @@ Datahub.prototype.getStatus = function(name){
   return this._crud(this.config.url + '/channel/' + name + '/status', 'GET');
 };
 
+/**
+ * get latest channel content
+ */
 Datahub.prototype.getLatest = function(name){
   if (!name){
     throw new Error('Missing channel name');
@@ -123,6 +144,9 @@ Datahub.prototype.getLatest = function(name){
   return this._crud(this.config.url + '/channel/' + name + '/latest', 'GET');
 };
 
+/**
+ * get earliest channel content
+ */
 Datahub.prototype.getEarliest = function(name){
   if (!name){
     throw new Error('Missing channel name');
