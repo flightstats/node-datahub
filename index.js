@@ -46,6 +46,10 @@ Datahub.prototype._crud = function (url, method, data) {
 
 /**
 * create a new channel
+* @param {string} name - name of new channel
+* @param {number} [ttlDays=120] - number of days used to limit the items in a channel by time
+* @param {string} [description] - channel description
+* @param {array} [tags] - string tags
 */
 Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
   if (!name){
@@ -76,6 +80,7 @@ Datahub.prototype.getChannels = function(){
 
 /**
  * get a specific channel
+ * @param {string} name - channel name
  */
 Datahub.prototype.getChannel = function(name){
   if (!name){
@@ -87,6 +92,7 @@ Datahub.prototype.getChannel = function(name){
 
 /**
  * delete a specific channel
+ * @param {string} name - channel name
  */
 Datahub.prototype.deleteChannel = function(name){
   if (!name){
