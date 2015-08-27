@@ -104,6 +104,8 @@ Datahub.prototype.deleteChannel = function(name){
 
 /**
  * add content to a channel
+ * @param {string} name - channel name
+ * @param {string} content - text content to add to channel
  */
 Datahub.prototype.addContent = function(name, content){
   if (!name){
@@ -119,17 +121,18 @@ Datahub.prototype.addContent = function(name, content){
 
 /**
  * get channel content
+ * @param {string} name - channel name
  */
-Datahub.prototype.getContent = function(channelUrl){
-  if (!channelUrl){
-    throw new Error('Missing channel URL');
+Datahub.prototype.getContent = function(name){
+  if (!name){
+    throw new Error('Missing channel name');
   }
-
-  return this._crud(this.config.url + channelUrl, 'GET');
+  return this._crud(this.config.url + '/channel/' + name, 'GET');
 };
 
 /**
  * get channel status
+ * @param {string} name - channel name
  */
 Datahub.prototype.getStatus = function(name){
   if (!name){
@@ -141,6 +144,7 @@ Datahub.prototype.getStatus = function(name){
 
 /**
  * get latest channel content
+ * @param {string} name - channel name
  */
 Datahub.prototype.getLatest = function(name){
   if (!name){
@@ -152,6 +156,7 @@ Datahub.prototype.getLatest = function(name){
 
 /**
  * get earliest channel content
+ * @param {string} name - channel name
  */
 Datahub.prototype.getEarliest = function(name){
   if (!name){
