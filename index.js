@@ -167,9 +167,13 @@ Datahub.prototype.getEarliest = function(name){
 };
 
 /*
-  Group Callback Operations
+ * create a group callback
+ * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
+ * @param {string} name - callback name
+ * @param {string} channelUrl - url of the fully qualified channel location to monitor for new items
+ * @param {string} callbackUrl - the fully qualified location to receive callbacks from the server
+ * @param {number} [parallelCalls=1] - number of callbacks to make in parallel
  */
-
 Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, parallelCalls){
   if (!name){
     throw new Error('Missing group name');
