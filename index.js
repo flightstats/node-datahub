@@ -169,7 +169,7 @@ Datahub.prototype.getEarliest = function(name){
 /*
  * create a group callback
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
- * @param {string} name - callback name
+ * @param {string} name - group callback name
  * @param {string} channelUrl - url of the fully qualified channel location to monitor for new items
  * @param {string} callbackUrl - the fully qualified location to receive callbacks from the server
  * @param {number} [parallelCalls=1] - number of callbacks to make in parallel
@@ -200,10 +200,19 @@ Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, 
   return this._crud(this.config.url + '/group/' + name, 'PUT', data);
 };
 
+/**
+ * Get a list of existing group callbacks
+ * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
+ */
 Datahub.prototype.getGroupCallbacks = function(){
   return this._crud(this.config.url + '/group', 'GET');
 };
 
+/**
+ * Get the configuration and status of an existing group callback
+ * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
+ * @param {string} name - group callback name
+ */
 Datahub.prototype.getGroupCallback = function(name){
   if (!name){
     throw new Error('Missing group name');
@@ -212,6 +221,11 @@ Datahub.prototype.getGroupCallback = function(name){
   return this._crud(this.config.url + '/group/' + name, 'GET');
 };
 
+/**
+ * Delete an existing group callback
+ * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
+ * @param {string} name - group callback name
+ */
 Datahub.prototype.deleteGroupCallback = function(name){
   if (!name){
     throw new Error('Missing group name');
