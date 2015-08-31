@@ -10,6 +10,7 @@ var rp = require('request-promise');
  * @param {string} config.url - datahub url
  * @param {Object} [config.requestPromiseOptions] - options passed to request-promise
  *
+ * @see {@link https://github.com/flightstats/hub|Hub}
  * @example
  *    new Datahub({
  *      url: '...',
@@ -46,6 +47,7 @@ Datahub.prototype._crud = function (url, method, data) {
 
 /**
 * create a new channel
+ * @see {@link https://github.com/flightstats/hub#create-a-channel|Create a Channel}
 * @param {string} name - name of new channel
 * @param {number} [ttlDays=120] - number of days used to limit the items in a channel by time
 * @param {string} [description] - channel description
