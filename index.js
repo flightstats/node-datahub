@@ -247,12 +247,11 @@ Datahub.prototype.deleteGroupCallback = function(name){
  */
 Datahub.prototype.getGroupCallbackContent = function(data) {
   if (!data || !data.uris || !data.uris[0]) {
-    console.error('Missing data', data);
     throw new Error('Missing data');
   }
   else {
     var url = data.uris[0];
-    return this.getContent(url);
+    return this._crud(url, 'GET');
   }
 }
 
