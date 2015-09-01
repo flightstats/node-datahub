@@ -718,6 +718,269 @@
 
     
 
+    <h4 class="name" id="createGroupCallback"><span class="type-signature"></span>createGroupCallback<span class="signature">(name, channelName, callbackUrl, parallelCalls<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    create a group callback
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">group callback name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>channelName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">the channel name to monitor for new items</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callbackUrl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">the fully qualified location to receive callbacks from the server</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parallelCalls</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">number of callbacks to make in parallel</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line185">line 185</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://github.com/flightstats/hub#group-callback">Group Callbacks</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="deleteChannel"><span class="type-signature"></span>deleteChannel<span class="signature">(name)</span><span class="type-signature"></span></h4>
 
     
@@ -949,7 +1212,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line231">line 231</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line237">line 237</a>
     </li></ul></dd>
     
 
@@ -1200,7 +1463,7 @@
 
     
 
-    <h4 class="name" id="getContent"><span class="type-signature"></span>getContent<span class="signature">(name)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getContent"><span class="type-signature"></span>getContent<span class="signature">(name, id)</span><span class="type-signature"></span></h4>
 
     
 
@@ -1263,6 +1526,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">content id</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1300,7 +1586,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line128">line 128</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line129">line 129</a>
     </li></ul></dd>
     
 
@@ -1431,7 +1717,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line163">line 163</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line169">line 169</a>
     </li></ul></dd>
     
 
@@ -1562,7 +1848,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line218">line 218</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line224">line 224</a>
     </li></ul></dd>
     
 
@@ -1651,7 +1937,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line209">line 209</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line215">line 215</a>
     </li></ul></dd>
     
 
@@ -1789,7 +2075,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line151">line 151</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line157">line 157</a>
     </li></ul></dd>
     
 
@@ -1920,7 +2206,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line139">line 139</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -1968,7 +2254,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Aug 31 2015 09:00:34 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Tue Sep 01 2015 14:33:52 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>
