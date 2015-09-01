@@ -534,6 +534,33 @@ describe('node-datahub', function(){
 
   });
 
+  describe('getGroupCallbackContent', function () {
+
+    it('should throw an Error if no data is supplied', function (done) {
+      expect(function () {
+        datahub.getGroupCallbackContent();
+      }).to.throw(Error);
+      done();
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .get('/group/testGroupCallback')
+        .reply(200, {});
+
+      promiseResolved(datahub.getGroupCallbackContent({uris:[testHubUrl + '/group/testGroupCallback']}), done);
+    });
+
+    it('should return rejected promise', function(done) {
+      nock(testHubUrl)
+        .get('/group/testGroupCallback')
+        .reply(404, 'Simulating get group callback thrown error!');
+
+      promiseRejected(datahub.getGroupCallbackContent({uris:[testHubUrl + '/testGroupCallback']}), done);
+    });
+
+  });
+
 });
 
 function promiseResolved (promise, done) {
