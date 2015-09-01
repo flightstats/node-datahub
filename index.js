@@ -242,4 +242,18 @@ Datahub.prototype.deleteGroupCallback = function(name){
   return this._crud(this.config.url + '/group/' + name, 'DELETE');
 };
 
+/**
+ * Get content for first uri included in a callback
+ */
+Datahub.prototype.getGroupCallbackContent = function(data) {
+  if (!data || !data.uris || !data.uris[0]) {
+    console.error('Missing data', data);
+    throw new Error('Missing data');
+  }
+  else {
+    var url = data.uris[0];
+    return this.getContent(url);
+  }
+}
+
 module.exports = Datahub;
