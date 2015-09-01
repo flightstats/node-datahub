@@ -244,6 +244,8 @@ Datahub.prototype.deleteGroupCallback = function(name){
 
 /**
  * Get content for first uri included in a callback
+ * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
+ * @param {string} data - group callback response data
  */
 Datahub.prototype.getGroupCallbackContent = function(data) {
   if (!data || !data.uris || !data.uris[0]) {
@@ -253,6 +255,6 @@ Datahub.prototype.getGroupCallbackContent = function(data) {
     var url = data.uris[0];
     return this._crud(url, 'GET');
   }
-}
+};
 
 module.exports = Datahub;
