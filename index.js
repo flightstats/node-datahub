@@ -124,12 +124,18 @@ Datahub.prototype.addContent = function(name, content){
 /**
  * get channel content
  * @param {string} name - channel name
+ * @param {string} id - content id
  */
-Datahub.prototype.getContent = function(name){
+Datahub.prototype.getContent = function(name, id){
   if (!name){
     throw new Error('Missing channel name');
   }
-  return this._crud(this.config.url + '/channel/' + name, 'GET');
+
+  if (!id){
+    throw new Error('Missing content id');
+  }
+
+  return this._crud(this.config.url + '/channel/' + name + '/' + id, 'GET');
 };
 
 /**
@@ -168,21 +174,21 @@ Datahub.prototype.getEarliest = function(name){
   return this._crud(this.config.url + '/channel/' + name + '/earliest', 'GET');
 };
 
-/*
+/**
  * create a group callback
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  * @param {string} name - group callback name
- * @param {string} channelUrl - url of the fully qualified channel location to monitor for new items
+ * @param {string} channelName - the channel name to monitor for new items
  * @param {string} callbackUrl - the fully qualified location to receive callbacks from the server
  * @param {number} [parallelCalls=1] - number of callbacks to make in parallel
  */
-Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, parallelCalls){
+Datahub.prototype.createGroupCallback = function(name, channelName, callbackUrl, parallelCalls){
   if (!name){
     throw new Error('Missing group name');
   }
 
-  if (!channelUrl){
-    throw new Error('Missing channel URL');
+  if (!channelName){
+    throw new Error('Missing channel name');
   }
 
   if (!callbackUrl){
@@ -194,7 +200,7 @@ Datahub.prototype.createGroupCallback = function(name, channelUrl, callbackUrl, 
   }
 
   var data = {
-    channelUrl: channelUrl,
+    channelUrl: this.config.url + '/channel/' + channelName,
     callbackUrl: callbackUrl,
     parallelCalls: parallelCalls
   };

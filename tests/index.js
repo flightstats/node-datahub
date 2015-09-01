@@ -289,18 +289,18 @@ describe('node-datahub', function(){
 
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
-        .get('/channel/testChannel')
+        .get('/channel/testChannel/2015/01/01/123abc')
         .reply(200, { foo: 'bar' });
 
-      promiseResolved(datahub.getContent('testChannel'), done);
+      promiseResolved(datahub.getContent('testChannel', '2015/01/01/123abc'), done);
     });
 
     it('should return rejected promise', function(done) {
       nock(testHubUrl)
-        .get('/channel/testChannel')
+        .get('/channel/testChannel/2015/01/01/123abc')
         .reply(404, 'Simulating get content thrown error!');
 
-      promiseRejected(datahub.getContent('testChannel'), done);
+      promiseRejected(datahub.getContent('testChannel', '2015/01/01/123abc'), done);
     });
 
   });
@@ -404,16 +404,14 @@ describe('node-datahub', function(){
 
     it('should throw an Error if no callback url is supplied', function (done) {
       expect(function () {
-        datahub.createGroupCallback('testGroupCallback', testHubUrl + '/channel/testChannel');
+        datahub.createGroupCallback('testGroupCallback', 'testChannel');
       }).to.throw(Error);
       done();
     });
 
     it('should throw an Error if no parallel calls is supplied', function (done) {
       expect(function () {
-        datahub.createGroupCallback('testGroupCallback',
-          testHubUrl + '/channel/testChannel',
-          'http://somewhere.com/callback');
+        datahub.createGroupCallback('testGroupCallback', 'testChannel', 'http://somewhere.com/callback');
       }).to.throw(Error);
       done();
     });
@@ -436,9 +434,7 @@ describe('node-datahub', function(){
         });
 
       promiseResolved(datahub.createGroupCallback('testGroupCallback',
-        testHubUrl + '/channel/testChannel',
-        'http://somewhere.com/callback',
-        10), done);
+        'testChannel', 'http://somewhere.com/callback', 10), done);
     });
 
     it('should return rejected promise', function(done) {
@@ -451,9 +447,7 @@ describe('node-datahub', function(){
         .reply(404, 'Simulating create group callback thrown error!');
 
       promiseRejected(datahub.createGroupCallback('testGroupCallback',
-        testHubUrl + '/channel/testChannel',
-        'http://somewhere.com/callback',
-        10), done);
+        'testChannel', 'http://somewhere.com/callback', 10), done);
     });
 
   });
