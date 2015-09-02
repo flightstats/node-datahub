@@ -75,6 +75,7 @@ Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
 
 /**
  * get a list of channels
+ * @see {@link https://github.com/flightstats/hub#list-channels|List Channels}
  */
 Datahub.prototype.getChannels = function(){
   return this._crud(this.config.url + '/channel', 'GET');
@@ -82,6 +83,7 @@ Datahub.prototype.getChannels = function(){
 
 /**
  * get a specific channel
+ * @see {@link https://github.com/flightstats/hub#fetch-channel-metadata|Fetch Channel Metadata}
  * @param {string} name - channel name
  */
 Datahub.prototype.getChannel = function(name){
@@ -95,6 +97,7 @@ Datahub.prototype.getChannel = function(name){
 /**
  * delete a specific channel
  * @param {string} name - channel name
+ * @see {@link https://github.com/flightstats/hub#delete-a-channel|Delete a Channel}
  */
 Datahub.prototype.deleteChannel = function(name){
   if (!name){
