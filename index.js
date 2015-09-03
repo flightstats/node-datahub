@@ -109,6 +109,7 @@ Datahub.prototype.deleteChannel = function(name){
 
 /**
  * add content to a channel
+ * @see {@link https://github.com/flightstats/hub#insert-content-into-channel|Insert content into a Channel}
  * @param {string} name - channel name
  * @param {string} content - text content to add to channel
  */
@@ -126,6 +127,7 @@ Datahub.prototype.addContent = function(name, content){
 
 /**
  * get channel content
+ * @see {@link https://github.com/flightstats/hub#fetch-content-from-channel|Fetch content from a Channel}
  * @param {string} name - channel name
  * @param {string} id - content id
  */
