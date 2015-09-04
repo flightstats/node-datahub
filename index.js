@@ -145,6 +145,7 @@ Datahub.prototype.getContent = function(name, id){
 
 /**
  * get channel status
+ * @see {@link https://github.com/flightstats/hub#channel-status|Get Channel Status}
  * @param {string} name - channel name
  */
 Datahub.prototype.getStatus = function(name){
@@ -157,6 +158,7 @@ Datahub.prototype.getStatus = function(name){
 
 /**
  * get latest channel content
+ * @see {@link https://github.com/flightstats/hub#latest-channel-item|Latest Channel Item}
  * @param {string} name - channel name
  */
 Datahub.prototype.getLatest = function(name){
@@ -169,6 +171,7 @@ Datahub.prototype.getLatest = function(name){
 
 /**
  * get earliest channel content
+ * @see {@link https://github.com/flightstats/hub#earliest-channel-item|Earliest Channel Item}
  * @param {string} name - channel name
  */
 Datahub.prototype.getEarliest = function(name){
@@ -255,8 +258,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
 Datahub.prototype.getGroupCallbackContent = function(data) {
   if (!data || !data.uris || !data.uris[0]) {
     throw new Error('Missing data');
-  }
-  else {
+  } else {
     var url = data.uris[0];
     return this._crud(url, 'GET');
   }
