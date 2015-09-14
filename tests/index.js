@@ -10,9 +10,10 @@ describe('node-datahub', function(){
   var testHubUrl = 'http://hub';
   var testWSHubUrl = 'ws://hub';
   var config = {
-    url: testHubUrl
+    url: testHubUrl,
+    requestPromiseOptions: {}
   };
-  var datahub = new Datahub(config);
+  var datahub;
 
   it('should throw an Error if no datahub url is supplied', function(){
     expect(function(){
@@ -24,7 +25,7 @@ describe('node-datahub', function(){
 
   it('should not throw an Error', function(){
     expect(function(){
-      new Datahub(config);
+      datahub = new Datahub(config);
     }).to.not.throw(Error);
   });
 
@@ -82,44 +83,105 @@ describe('node-datahub', function(){
       done();
     });
 
-    it('should return resolved promise', function(done) {
-      nock(testHubUrl)
-        .post('/channel', { name: 'testChannel', ttlDays: 10, description: 'testing', tags: [ 'test' ] })
-        .reply(200, hubResponse);
+    it('should throw an Error if no channel name is supplied', function(done) {
+      expect(function() {
+        datahub.createChannel({});
+      }).to.throw(Error);
+      done();
+    });
 
-      promiseResolved(datahub.createChannel('testChannel', 10, 'testing', [ 'test' ]), done);
+    it('should throw an Error if no channel owner is supplied', function(done) {
+      expect(function() {
+        datahub.createChannel({ name: 'testChannel' });
+      }).to.throw(Error);
+      done();
     });
 
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
-        .post('/channel', { name: 'testChannel', ttlDays: 10 })
+        .post('/channel', {
+          name: 'testChannel',
+          owner: 'testOwner'
+        })
         .reply(200, hubResponse);
 
-      promiseResolved(datahub.createChannel('testChannel', '10'), done);
+      promiseResolved(datahub.createChannel({
+        name: 'testChannel',
+        owner: 'testOwner'
+      }), done);
     });
 
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
-        .post('/channel', { name: 'testChannel' })
+        .post('/channel', {
+          name: 'testChannel',
+          owner: 'testOwner',
+          ttlDays: 10,
+          description: 'testing',
+          tags: [ 'test' ]
+        })
         .reply(200, hubResponse);
 
-      promiseResolved(datahub.createChannel('testChannel', {}), done);
+      promiseResolved(datahub.createChannel({
+        name: 'testChannel',
+        owner: 'testOwner',
+        ttlDays: 10,
+        description: 'testing',
+        tags: [ 'test' ]
+      }), done);
     });
 
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
-        .post('/channel', { name: 'testChannel' })
+        .post('/channel', {
+          name: 'testChannel',
+          owner: 'testOwner',
+          ttlDays: 10,
+          description: 'testing',
+          tags: [ 'test' ]
+        })
         .reply(200, hubResponse);
 
-      promiseResolved(datahub.createChannel('testChannel', 'test'), done);
+      promiseResolved(datahub.createChannel({
+        name: 'testChannel',
+        owner: 'testOwner',
+        ttlDays: '10',
+        description: 'testing',
+        tags: [ 'test' ]
+      }), done);
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .post('/channel', {
+          name: 'testChannel',
+          owner: 'testOwner',
+          description: 'testing',
+          tags: [ 'test' ]
+        })
+        .reply(200, hubResponse);
+
+      promiseResolved(datahub.createChannel({
+        name: 'testChannel',
+        owner: 'testOwner',
+        ttlDays: '{}',
+        description: 'testing',
+        tags: [ 'test' ]
+      }), done);
     });
 
     it('should return rejected promise', function(done) {
       nock(testHubUrl)
-        .post('/channel', { name: 'testChannel', ttlDays: 10 })
+        .post('/channel', {
+          name: 'testChannel',
+          owner: 'testOwner'
+        })
         .reply(409, 'Simulating create channel thrown error!');
 
-      promiseRejected(datahub.createChannel('testChannel', 10), done);
+      promiseRejected(datahub.createChannel({
+        name: 'testChannel',
+        owner: 'testOwner'
+      }), done);
     });
 
   });
@@ -287,6 +349,13 @@ describe('node-datahub', function(){
       done();
     });
 
+    it('should throw an Error if no channel id is supplied', function (done) {
+      expect(function () {
+        datahub.getContent('testChannel');
+      }).to.throw(Error);
+      done();
+    });
+
     it('should return resolved promise', function(done) {
       nock(testHubUrl)
         .get('/channel/testChannel/2015/01/01/123abc')
@@ -395,23 +464,38 @@ describe('node-datahub', function(){
       done();
     });
 
+    it('should throw an Error if no group name is supplied', function (done) {
+      expect(function () {
+        datahub.createGroupCallback({});
+      }).to.throw(Error);
+      done();
+    });
+
     it('should throw an Error if no channel url is supplied', function (done) {
       expect(function () {
-        datahub.createGroupCallback('testGroupCallback');
+        datahub.createGroupCallback({
+          name: 'testGroupCallback'
+        });
       }).to.throw(Error);
       done();
     });
 
     it('should throw an Error if no callback url is supplied', function (done) {
       expect(function () {
-        datahub.createGroupCallback('testGroupCallback', 'testChannel');
+        datahub.createGroupCallback({
+          name: 'testGroupCallback',
+          channelName: 'testChannel'
+        });
       }).to.throw(Error);
       done();
     });
 
     it('should throw an Error if no parallel calls is supplied', function (done) {
       expect(function () {
-        datahub.createGroupCallback('testGroupCallback', 'testChannel', 'http://somewhere.com/callback');
+        datahub.createGroupCallback({
+          name: 'testGroupCallback',
+          channelName: 'testChannel',
+          callbackUrl: 'http://somewhere.com/callback'});
       }).to.throw(Error);
       done();
     });
@@ -433,8 +517,12 @@ describe('node-datahub', function(){
           parallelCalls: 10
         });
 
-      promiseResolved(datahub.createGroupCallback('testGroupCallback',
-        'testChannel', 'http://somewhere.com/callback', 10), done);
+      promiseResolved(datahub.createGroupCallback({
+        name: 'testGroupCallback',
+        channelName: 'testChannel',
+        callbackUrl: 'http://somewhere.com/callback',
+        parallelCalls: 10
+      }), done);
     });
 
     it('should return rejected promise', function(done) {
@@ -446,8 +534,12 @@ describe('node-datahub', function(){
         })
         .reply(404, 'Simulating create group callback thrown error!');
 
-      promiseRejected(datahub.createGroupCallback('testGroupCallback',
-        'testChannel', 'http://somewhere.com/callback', 10), done);
+      promiseRejected(datahub.createGroupCallback({
+        name: 'testGroupCallback',
+        channelName: 'testChannel',
+        callbackUrl: 'http://somewhere.com/callback',
+        parallelCalls: 10
+      }), done);
     });
 
   });
