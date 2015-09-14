@@ -46,29 +46,35 @@ Datahub.prototype._crud = function (url, method, data) {
 };
 
 /**
-* create a new channel
+ * create a new channel
  * @see {@link https://github.com/flightstats/hub#create-a-channel|Create a Channel}
-* @param {string} name - name of new channel
-* @param {number} [ttlDays=120] - number of days used to limit the items in a channel by time
-* @param {string} [description] - channel description
-* @param {array} [tags] - string tags
-*/
-Datahub.prototype.createChannel = function(name, ttlDays, description, tags){
-  if (!name){
+ * @param {Object} config - configuration details for new channel
+ * @param {string} config.name - name of new channel
+ * @param {string} config.owner - owner of new channel
+ * @param {number} [config.ttlDays=120] - number of days used to limit the items in a channel by time
+ * @param {string} [config.description] - channel description
+ * @param {array} [config.tags] - string tags
+ */
+Datahub.prototype.createChannel = function(config){
+  if (!config.name){
     throw new Error('Missing channel name');
   }
 
-  var data = { name: name };
-  if (_.isNumber(ttlDays)) {
-    data.ttlDays = ttlDays;
-  } else if (_.isString(ttlDays)){
-    ttlDays = parseInt(ttlDays, 10);
+  if (!config.owner){
+    throw new Error('Missing channel owner');
+  }
+
+  var data = { name: config.name, owner: config.owner };
+  if (_.isNumber(config.ttlDays)) {
+    data.ttlDays = config.ttlDays;
+  } else if (_.isString(config.ttlDays)){
+    var ttlDays = parseInt(config.ttlDays, 10);
     if (ttlDays){
       data.ttlDays = ttlDays;
     }
   }
-  if (description) { data.description = description; }
-  if (tags) { data.tags = tags; }
+  if (config.description) { data.description = config.description; }
+  if (config.tags) { data.tags = config.tags; }
 
   return this._crud(this.config.url + '/channel', 'POST', data);
 };
@@ -185,35 +191,36 @@ Datahub.prototype.getEarliest = function(name){
 /**
  * create a group callback
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
- * @param {string} name - group callback name
- * @param {string} channelName - the channel name to monitor for new items
- * @param {string} callbackUrl - the fully qualified location to receive callbacks from the server
- * @param {number} [parallelCalls=1] - number of callbacks to make in parallel
+ * @param {Object} config - configuration details for new group callback
+ * @param {string} config.name - group callback name
+ * @param {string} config.channelName - the channel name to monitor for new items
+ * @param {string} config.callbackUrl - the fully qualified location to receive callbacks from the server
+ * @param {number} config.parallelCalls - number of callbacks to make in parallel
  */
-Datahub.prototype.createGroupCallback = function(name, channelName, callbackUrl, parallelCalls){
-  if (!name){
+Datahub.prototype.createGroupCallback = function(config){
+  if (!config.name){
     throw new Error('Missing group name');
   }
 
-  if (!channelName){
+  if (!config.channelName){
     throw new Error('Missing channel name');
   }
 
-  if (!callbackUrl){
+  if (!config.callbackUrl){
     throw new Error('Missing callback URL');
   }
 
-  if (!parallelCalls){
+  if (!config.parallelCalls){
     throw new Error('Missing number of parallel calls');
   }
 
   var data = {
-    channelUrl: this.config.url + '/channel/' + channelName,
-    callbackUrl: callbackUrl,
-    parallelCalls: parallelCalls
+    channelUrl: this.config.url + '/channel/' + config.channelName,
+    callbackUrl: config.callbackUrl,
+    parallelCalls: config.parallelCalls
   };
 
-  return this._crud(this.config.url + '/group/' + name, 'PUT', data);
+  return this._crud(this.config.url + '/group/' + config.name, 'PUT', data);
 };
 
 /**
