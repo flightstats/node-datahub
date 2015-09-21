@@ -37,7 +37,7 @@ Datahub.prototype._crud = function (url, method, data) {
   }
 
   if (method === 'GET') {
-    options.json = true;
+    options.json = (options.json == null) ? true : options.json;
   } else if (method === 'POST' || method === 'PUT') {
     options.json = data;
   }
