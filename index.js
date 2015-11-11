@@ -195,7 +195,8 @@ Datahub.prototype.getEarliest = function(name){
  * @param {string} config.name - group callback name
  * @param {string} config.channelName - the channel name to monitor for new items
  * @param {string} config.callbackUrl - the fully qualified location to receive callbacks from the server
- * @param {number} config.parallelCalls - number of callbacks to make in parallel
+ * @param {number} [config.parallelCalls=1] - number of callbacks to make in parallel
+ * @param {string} [config.startItem] - fully qualified item location where the callback should start from
  */
 Datahub.prototype.createGroupCallback = function(config){
   if (!config.name){
@@ -210,15 +211,21 @@ Datahub.prototype.createGroupCallback = function(config){
     throw new Error('Missing callback URL');
   }
 
-  if (!config.parallelCalls){
-    throw new Error('Missing number of parallel calls');
-  }
-
   var data = {
     channelUrl: this.config.url + '/channel/' + config.channelName,
-    callbackUrl: config.callbackUrl,
-    parallelCalls: config.parallelCalls
+    callbackUrl: config.callbackUrl
   };
+
+  if (_.isNumber(config.parallelCalls)) {
+    data.parallelCalls = config.parallelCalls;
+  } else if (_.isString(config.parallelCalls)){
+    var parallelCalls = parseInt(config.parallelCalls, 10);
+    if (parallelCalls){
+      data.parallelCalls = parallelCalls;
+    }
+  }
+
+  if (config.startItem) { data.startItem = config.startItem; }
 
   return this._crud(this.config.url + '/group/' + config.name, 'PUT', data);
 };

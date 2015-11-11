@@ -490,14 +490,52 @@ describe('node-datahub', function(){
       done();
     });
 
-    it('should throw an Error if no parallel calls is supplied', function (done) {
-      expect(function () {
-        datahub.createGroupCallback({
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .put('/group/testGroupCallback', {
+          channelUrl: testHubUrl + '/channel/testChannel',
+          callbackUrl: 'http://somewhere.com/callback'
+        })
+        .reply(200, {
           name: 'testGroupCallback',
-          channelName: 'testChannel',
-          callbackUrl: 'http://somewhere.com/callback'});
-      }).to.throw(Error);
-      done();
+          '_links': {
+            self: {
+              href: testHubUrl + '/group/testGroupCallback'
+            }
+          },
+          parallelCalls: 1
+        });
+
+      promiseResolved(datahub.createGroupCallback({
+        name: 'testGroupCallback',
+        channelName: 'testChannel',
+        callbackUrl: 'http://somewhere.com/callback',
+        parallelCalls: '{}'
+      }), done);
+    });
+
+    it('should return resolved promise', function(done) {
+      nock(testHubUrl)
+        .put('/group/testGroupCallback', {
+          channelUrl: testHubUrl + '/channel/testChannel',
+          callbackUrl: 'http://somewhere.com/callback'
+        })
+        .reply(200, {
+          name: 'testGroupCallback',
+          '_links': {
+            self: {
+              href: testHubUrl + '/group/testGroupCallback'
+            }
+          },
+          parallelCalls: 1
+        });
+
+      promiseResolved(datahub.createGroupCallback({
+        name: 'testGroupCallback',
+        channelName: 'testChannel',
+        callbackUrl: 'http://somewhere.com/callback',
+        parallelCalls: {}
+      }), done);
     });
 
     it('should return resolved promise', function(done) {
@@ -505,7 +543,8 @@ describe('node-datahub', function(){
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback',
-          parallelCalls: 10
+          parallelCalls: 10,
+          startItem: 'http://somewhere.com/channel/startItem'
         })
         .reply(200, {
           name: 'testGroupCallback',
@@ -521,7 +560,8 @@ describe('node-datahub', function(){
         name: 'testGroupCallback',
         channelName: 'testChannel',
         callbackUrl: 'http://somewhere.com/callback',
-        parallelCalls: 10
+        parallelCalls: 10,
+        startItem: 'http://somewhere.com/channel/startItem'
       }), done);
     });
 
@@ -530,7 +570,7 @@ describe('node-datahub', function(){
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback',
-          parallelCalls: 10
+          parallelCalls: '10'
         })
         .reply(404, 'Simulating create group callback thrown error!');
 
@@ -538,7 +578,7 @@ describe('node-datahub', function(){
         name: 'testGroupCallback',
         channelName: 'testChannel',
         callbackUrl: 'http://somewhere.com/callback',
-        parallelCalls: 10
+        parallelCalls: '10'
       }), done);
     });
 
