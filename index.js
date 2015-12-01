@@ -373,11 +373,11 @@ Datahub.prototype.updateGroupCallback = function(name, config){
     }
   }
 
-  if (_.isBoolean(config.paused) && config.paused) {
-    data.paused = true;
+  if (_.isBoolean(config.paused)) {
+    data.paused = config.paused;
   }
-  if (_.isBoolean(config.heartbeat) && config.heartbeat) {
-    data.heartbeat = true;
+  if (_.isBoolean(config.heartbeat)) {
+    data.heartbeat = config.heartbeat;
   }
 
   if (_.isNumber(config.maxWaitMinutes)) {

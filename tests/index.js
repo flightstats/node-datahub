@@ -624,6 +624,8 @@ describe('node-datahub', function(){
         .put('/group/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
+          paused: false,
+          heartbeat: false,
           maxWaitMinutes: 15,
           ttlMinutes: 20
         })
