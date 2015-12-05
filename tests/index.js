@@ -10,11 +10,16 @@ describe('node-datahub', function(){
 
   var testHubUrl = 'http://hub';
   var testWSHubUrl = 'ws://hub';
-  var config = {
-    url: testHubUrl,
-    requestPromiseOptions: {}
-  };
-  var datahub;
+  var config;
+
+  beforeEach(function(){
+    config = {
+      url: testHubUrl,
+      requestPromiseOptions: {},
+      queueTimerInterval: 500,
+      queueMaxPending: 5
+    };
+  });
 
   it('should throw an Error if no datahub url is supplied', function(){
     expect(function(){
@@ -26,11 +31,28 @@ describe('node-datahub', function(){
 
   it('should not throw an Error', function(){
     expect(function(){
-      datahub = new Datahub(config);
+      new Datahub(config);
     }).to.not.throw(Error);
   });
 
+  it('should be possible to get and set the property queueEnabled', function(){
+    var datahub = new Datahub(config);
+    datahub.queueEnabled = false;
+    expect(datahub.queueEnabled).to.be.false;
+    datahub.queueEnabled = true;
+    expect(datahub.queueEnabled).to.be.true;
+  });
+
+  it('should have queue methods', function(){
+    var datahub = new Datahub(config);
+    expect(datahub).to.respondTo('startQueue');
+    expect(datahub).to.respondTo('stopQueue');
+    expect(datahub).to.respondTo('finishQueue');
+    expect(datahub).to.respondTo('sendQueue');
+  });
+
   it('should have various CRUD methods', function(){
+    var datahub = new Datahub(config);
     expect(datahub).to.respondTo('createChannel');
     expect(datahub).to.respondTo('updateChannel');
     expect(datahub).to.respondTo('getChannels');
@@ -38,6 +60,7 @@ describe('node-datahub', function(){
     expect(datahub).to.respondTo('deleteChannel');
     expect(datahub).to.respondTo('getChannelStatus');
     expect(datahub).to.respondTo('addContent');
+    expect(datahub).to.respondTo('addContentToQueue');
     expect(datahub).to.respondTo('getContent');
     expect(datahub).to.respondTo('getLatest');
     expect(datahub).to.respondTo('getEarliest');
@@ -91,18 +114,22 @@ describe('node-datahub', function(){
     };
 
     it('should return rejected promise if no channel configuration is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createChannel(), done);
     });
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createChannel({}), done);
     });
 
     it('should return rejected promise if no channel owner is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createChannel({ name: 'testChannel' }), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .post('/channel', {
           name: 'testChannel',
@@ -117,6 +144,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .post('/channel', {
           name: 'testChannel',
@@ -136,6 +164,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .post('/channel', {
           name: 'testChannel',
@@ -160,6 +189,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .post('/channel', {
           name: 'testChannel',
@@ -188,14 +218,17 @@ describe('node-datahub', function(){
   describe('updateChannel', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.updateChannel(), done);
     });
 
     it('should return rejected promise if no channel configuration is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.updateChannel('testChannel'), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/channel/testChannel', {})
         .reply(200, {});
@@ -204,6 +237,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/channel/testChannel', {})
         .reply(200, {});
@@ -214,6 +248,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/channel/testChannel', {
           ttlDays: 10
@@ -226,6 +261,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/channel/testChannel', {
           owner: 'testOwner',
@@ -258,6 +294,7 @@ describe('node-datahub', function(){
     } };
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel')
         .reply(200, hubResponse);
@@ -270,10 +307,12 @@ describe('node-datahub', function(){
   describe('getChannel', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getChannel(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel')
         .reply(200, {});
@@ -286,10 +325,12 @@ describe('node-datahub', function(){
   describe('deleteChannel', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.deleteChannel(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .delete('/channel/testChannel')
         .reply(202);
@@ -302,10 +343,12 @@ describe('node-datahub', function(){
   describe('getChannelStatus', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getChannelStatus(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/status')
         .reply(200, { '_links': { 'latest': { 'href': '...' } } });
@@ -318,14 +361,17 @@ describe('node-datahub', function(){
   describe('addContent', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.addContent(), done);
     });
 
     it('should return rejected promise if no content is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.addContent('testChannel'), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .post('/channel/testChannel', { foo: 'bar' })
         .reply(200, {
@@ -343,17 +389,145 @@ describe('node-datahub', function(){
 
   });
 
+  describe('addContentToQueue', function () {
+
+    it('should send queue data that is added', function() {
+      var datahub = new Datahub(config);
+      var scope = nock(testHubUrl)
+        .post('/channel/testChannel', [{ foo: 'bar' }])
+        .reply(200, { });
+
+      datahub.addContentToQueue('testChannel', { foo: 'bar' });
+      datahub.sendQueue();
+      setTimeout(function() {
+        expect(scope.isDone()).to.be.true;
+      }, 1000);
+    });
+
+    it('should be stoppable', function() {
+      var datahub = new Datahub(config);
+      var scope = nock(testHubUrl)
+        .post('/channel/testChannel', [{ foo: 'bar' }])
+        .reply(200, { });
+
+      datahub.addContentToQueue('testChannel', { foo: 'bar' });
+      datahub.stopQueue();
+      setTimeout(function() {
+        expect(scope.isDone()).to.be.false;
+      }, 1000);
+    });
+
+    it('should be finishable', function() {
+      var datahub = new Datahub(config);
+      var scope = nock(testHubUrl)
+        .post('/channel/testChannel', [{ foo: 'bar' }])
+        .reply(200, { });
+
+      datahub.addContentToQueue('testChannel', { foo: 'bar' });
+      datahub.finishQueue();
+      datahub.sendQueue();
+      setTimeout(function() {
+        expect(scope.isDone()).to.be.false;
+      }, 100);
+      setTimeout(function() {
+        expect(scope.isDone()).to.be.true;
+      }, 1000);
+    });
+
+    it('should NOT send queue data that equals/exceeds queueMaxPending (queue disabled)', function(){
+      config.queueEnabled = false;
+      config.queueTimerInterval = 100000;
+      var datahub = new Datahub(config);
+      var scope = nock(testHubUrl)
+        .post('/channel/testChannelA', [
+          { foo1: 'bar1' },
+          { foo2: 'bar2' },
+          { foo3: 'bar3' },
+          { foo3: 'bar4' },
+          { foo3: 'bar5' }
+        ])
+        .reply(200, { });
+
+      datahub.addContentToQueue('testChannelA', { foo1: 'bar1' });
+      datahub.addContentToQueue('testChannelA', { foo2: 'bar2' });
+      datahub.addContentToQueue('testChannelA', { foo3: 'bar3' });
+      datahub.addContentToQueue('testChannelA', { foo4: 'bar4' });
+      datahub.addContentToQueue('testChannelA', { foo5: 'bar5' });
+
+      setTimeout(function(){
+        expect(scope.isDone()).to.be.false;
+      }, 100);
+    });
+
+    it('should automatically send queue data that equals/exceeds queueMaxPending', function(){
+      config.queueTimerInterval = 100000;
+      config.queueMaxPending = 10;
+      var datahub = new Datahub(config);
+      var scope1 = nock(testHubUrl)
+        .post('/channel/testChannelA', [
+          { foo1: 'bar1' },
+          { foo2: 'bar2' },
+          { foo3: 'bar3' }
+        ])
+        .reply(200, { });
+      var scope2 = nock(testHubUrl)
+        .post('/channel/testChannelB', [
+          { foo50: 'bar50' },
+          { foo51: 'bar51' }
+        ])
+        .reply(400, 'Test add hub content error!');
+      var scope3 = nock(testHubUrl)
+        .post('/channel/testChannelC', [
+          { foo150: 'bar150' },
+          { foo151: 'bar151' },
+          { foo152: 'bar152' },
+          { foo153: 'bar153' },
+          { foo154: 'bar154' }
+        ])
+        .reply(200, { });
+
+      // first two have insufficient params to be added to queue
+      datahub.addContentToQueue();
+      datahub.addContentToQueue('testChannelA');
+
+      datahub.addContentToQueue('testChannelA', { foo1: 'bar1' });
+      datahub.addContentToQueue('testChannelA', { foo2: 'bar2' });
+      datahub.addContentToQueue('testChannelA', { foo3: 'bar3' });
+      datahub.addContentToQueue('testChannelB', { foo50: 'bar50' });
+      datahub.addContentToQueue('testChannelB', { foo51: 'bar51' });
+      datahub.addContentToQueue('testChannelC', { foo150: 'bar150' });
+      datahub.addContentToQueue('testChannelC', { foo151: 'bar151' });
+      datahub.addContentToQueue('testChannelC', { foo152: 'bar152' });
+      datahub.addContentToQueue('testChannelC', { foo153: 'bar153' });
+      datahub.addContentToQueue('testChannelC', { foo154: 'bar154' });
+
+      setTimeout(function(){
+        expect(scope1.isDone()).to.be.true;
+      }, 1000);
+      setTimeout(function(){
+        expect(scope2.isDone()).to.be.true;
+      }, 1000);
+      setTimeout(function(){
+        expect(scope3.isDone()).to.be.true;
+      }, 1000);
+    });
+
+  });
+
   describe('getContent', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getContent(), done);
     });
 
     it('should return rejected promise if no channel id is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getContent('testChannel'), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/2015/01/01/123abc')
         .reply(200, { foo: 'bar' });
@@ -366,14 +540,17 @@ describe('node-datahub', function(){
   describe('getLatest', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getLatest(), done);
     });
 
     it('should return rejected promise if invalid number parameter is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getLatest('testChannel', 'A'), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/latest')
         .reply(200, { foo: 'bar' });
@@ -382,6 +559,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/latest/5')
         .reply(200, { foo: 'bar' });
@@ -394,14 +572,17 @@ describe('node-datahub', function(){
   describe('getEarliest', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getEarliest(), done);
     });
 
     it('should return rejected promise if invalid number parameter is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getEarliest('testChannel', 'A'), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/earliest')
         .reply(200, { foo: 'bar' });
@@ -410,6 +591,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/earliest/5')
         .reply(200, { foo: 'bar' });
@@ -422,10 +604,12 @@ describe('node-datahub', function(){
   describe('getTime', function () {
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getTime(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/channel/testChannel/time')
         .reply(200, { });
@@ -438,18 +622,22 @@ describe('node-datahub', function(){
   describe('createGroupCallback', function () {
 
     it('should return rejected promise if no group configuration is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createGroupCallback(), done);
     });
 
     it('should return rejected promise if no group name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createGroupCallback({}), done);
     });
 
     it('should return rejected promise if no channel name is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createGroupCallback({ name: 'testGroupCallback' }), done);
     });
 
     it('should return rejected promise if no callback url is supplied', function(done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.createGroupCallback({
         name: 'testGroupCallback',
         channelName: 'testChannel'
@@ -457,6 +645,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
@@ -472,6 +661,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
@@ -490,6 +680,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
@@ -511,6 +702,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
@@ -538,6 +730,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
@@ -571,14 +764,17 @@ describe('node-datahub', function(){
   describe('updateGroupCallback', function () {
 
     it('should return rejected promise if no group name is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.updateGroupCallback(), done);
     });
 
     it('should return rejected promise if no group configuration is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.updateGroupCallback('testGroupCallback'), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {})
         .reply(200, {});
@@ -587,6 +783,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback'
@@ -602,6 +799,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
@@ -620,6 +818,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
@@ -642,6 +841,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/group/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
@@ -668,6 +868,7 @@ describe('node-datahub', function(){
   describe('getGroupCallbacks', function () {
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/group')
         .reply(200, { '_links': {
@@ -682,10 +883,12 @@ describe('node-datahub', function(){
   describe('getGroupCallback', function () {
 
     it('should return rejected promise if no group callback name is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getGroupCallback(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/group/testGroupCallback')
         .reply(200, {});
@@ -698,10 +901,12 @@ describe('node-datahub', function(){
   describe('deleteGroupCallback', function () {
 
     it('should return rejected promise if no group callback name is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.deleteGroupCallback(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .delete('/group/testGroupCallback')
         .reply(202);
@@ -714,10 +919,12 @@ describe('node-datahub', function(){
   describe('getGroupCallbackContent', function () {
 
     it('should return rejected promise if no data is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.getGroupCallbackContent(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/group/testGroupCallback')
         .reply(200, {});
@@ -730,24 +937,29 @@ describe('node-datahub', function(){
   describe('channelAlert', function() {
 
     it('should return rejected promise if no alert name is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert(), done);
     });
 
     it('should return rejected promise if no alert config is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert'), done);
     });
 
     it('should return rejected promise if no alert source is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {}), done);
     });
 
     it('should return rejected promise if no alert serviceName is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource'
       }), done);
     });
 
     it('should return rejected promise if no alert time window is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName'
@@ -755,6 +967,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if no alert operator is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -763,6 +976,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if no alert threshold is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -772,6 +986,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert time window is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -782,6 +997,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert time window is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -792,6 +1008,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert operator is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -802,6 +1019,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert threshold is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -812,6 +1030,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert threshold is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.channelAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -822,6 +1041,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/alert/testAlert', {
           source: 'testAlertSource',
@@ -843,6 +1063,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/alert/testAlert', {
           source: 'testAlertSource',
@@ -868,24 +1089,29 @@ describe('node-datahub', function(){
   describe('groupAlert', function() {
 
     it('should return rejected promise if no alert name is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert(), done);
     });
 
     it('should return rejected promise if no alert config is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert('testAlert'), done);
     });
 
     it('should return rejected promise if no alert source is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert('testAlert', {}), done);
     });
 
     it('should return rejected promise if no alert serviceName is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert('testAlert', {
         source: 'testAlertSource'
       }), done);
     });
 
     it('should return rejected promise if no alert timeWindowMinutes is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName'
@@ -893,6 +1119,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert time window is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -901,6 +1128,7 @@ describe('node-datahub', function(){
     });
 
     it('should return rejected promise if invalid alert time window is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.groupAlert('testAlert', {
         source: 'testAlertSource',
         serviceName: 'testAlertServiceName',
@@ -909,6 +1137,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/alert/testAlert', {
           source: 'testAlertSource',
@@ -926,6 +1155,7 @@ describe('node-datahub', function(){
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .put('/alert/testAlert', {
           source: 'testAlertSource',
@@ -947,10 +1177,12 @@ describe('node-datahub', function(){
   describe('alertStatus', function() {
 
     it('should return rejected promise if no alert name is supplied', function (done) {
+      var datahub = new Datahub(config);
       promiseRejected(datahub.alertStatus(), done);
     });
 
     it('should return resolved promise', function(done) {
+      var datahub = new Datahub(config);
       nock(testHubUrl)
         .get('/alert/testAlert')
         .reply(200, {});
