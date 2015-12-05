@@ -1,8 +1,9 @@
 'use strict';
 
 var _ = require('lodash');
-var Promise = require('promise');
+var Promise = require('bluebird');
 var rp = require('request-promise');
+var logger = console;
 
 /**
  * Datahub
@@ -10,6 +11,9 @@ var rp = require('request-promise');
  * @param {Object} config - configuration object
  * @param {string} config.url - datahub url
  * @param {Object} [config.requestPromiseOptions] - options passed to request-promise
+ * @param {boolean} [config.queueEnabled=true] - enable/disable the sending of channel data via a queue
+ * @param {number} [config.queueTimerInterval=10000] - the timer interval (in milliseconds) that is used for sending queued channel data
+ * @param {number} [config.queueMaxPending=1000] - the maximum number of items held in the channel data queue before being sent
  *
  * @see {@link https://github.com/flightstats/hub|Hub}
  * @example
@@ -20,13 +24,81 @@ var rp = require('request-promise');
  */
 function Datahub(config){
   this.config = _.assign({
-    url: null
+    url: null,
+    logger: logger,
+    queueEnabled: true,
+    queueTimerInterval: 10000,
+    queueMaxPending: 1000
   }, config);
 
   if (_.isEmpty(this.config.url)){
     throw new Error('Missing datahub URL');
   }
+
+  this.queueShouldFinish = false;
+  this.queue = { curCount: 0, data: {} }; // { curCount: X, data: { channelName1: content, channelName2: content, ... } }
+  this.queueTimerId = null;
+  this.queueTimerCallback = _.bind(this.sendQueue, this);
+
+  Object.defineProperty(this, 'queueEnabled', {
+    get: function () {
+      return this.config.queueEnabled;
+    },
+    set: function(val){
+      this.config.queueEnabled = val;
+    }
+  });
 }
+
+Datahub.prototype.startQueue = function () {
+  if (!this.queueTimerId){
+    this.queueTimerId = setInterval(this.queueTimerCallback, this.config.queueTimerInterval);
+  }
+};
+
+Datahub.prototype.stopQueue = function(){
+  if (this.queueTimerId){
+    clearInterval(this.queueTimerId);
+    this.queueTimerId = null;
+  }
+};
+
+Datahub.prototype.finishQueue = function(){
+  if (this.queueTimerId){
+    this.queueShouldFinish = true;
+  }
+};
+
+Datahub.prototype.sendQueue = function(){
+  if (this.config.queueEnabled && this.queue.curCount > 0) {
+    var that = this;
+    var queueItemsToParse = this.queue.data;
+    this.queue = { curCount: 0, data: {} };
+
+    var queueItems = [];
+    _.forIn(queueItemsToParse, function (value, key) {
+      queueItems.push({ channelName: key, content: value });
+    });
+
+    Promise.map(queueItems, function(queueItem) {
+      return that.addContent(queueItem.channelName, queueItem.content)
+        .then(function(resp) {
+          that.config.logger.log('Successfully added queue item content', queueItem.content);
+          return Promise.resolve();
+        }, function(err) {
+          that.config.logger.error('Error adding queue item',
+            (err.message) ? err.message : err);
+          return Promise.resolve(); // don't reject whole queue if one queue item fails...
+        });
+    }, { concurrency: 10 })
+      .then(function(resp) {
+        if (that.queueShouldFinish) {
+          that.stopQueue();
+          that.queueShouldFinish = false;
+        }
+      });
+  }
+};
 
 Datahub.prototype._crud = function (url, method, data) {
   var options = {
@@ -47,7 +119,7 @@ Datahub.prototype._crud = function (url, method, data) {
 };
 
 /**
- * create a new channel
+ * Create a new channel.
  * @see {@link https://github.com/flightstats/hub#create-a-channel|Create a Channel}
  * @param {Object} config - configuration details for new channel
  * @param {string} config.name - name of new channel
@@ -91,7 +163,7 @@ Datahub.prototype.createChannel = function(config){
 };
 
 /**
- * update a channel
+ * Update a channel.
  * @see {@link https://github.com/flightstats/hub#update-a-channel|Update a Channel}
  * @param {string} name - channel name
  * @param {Object} config - updated configuration details for channel
@@ -128,7 +200,7 @@ Datahub.prototype.updateChannel = function(name, config){
 };
 
 /**
- * get a list of channels
+ * Get a list of channels.
  * @see {@link https://github.com/flightstats/hub#list-channels|List Channels}
  */
 Datahub.prototype.getChannels = function(){
@@ -136,7 +208,7 @@ Datahub.prototype.getChannels = function(){
 };
 
 /**
- * get a specific channel
+ * Get a specific channel.
  * @see {@link https://github.com/flightstats/hub#fetch-channel-metadata|Fetch Channel Metadata}
  * @param {string} name - channel name
  */
@@ -149,7 +221,7 @@ Datahub.prototype.getChannel = function(name){
 };
 
 /**
- * delete a specific channel
+ * Delete a specific channel.
  * @param {string} name - channel name
  * @see {@link https://github.com/flightstats/hub#delete-a-channel|Delete a Channel}
  */
@@ -162,7 +234,7 @@ Datahub.prototype.deleteChannel = function(name){
 };
 
 /**
- * get channel status
+ * Get channel status.
  * @see {@link https://github.com/flightstats/hub#channel-status|Get Channel Status}
  * @param {string} name - channel name
  */
@@ -175,7 +247,7 @@ Datahub.prototype.getChannelStatus = function(name){
 };
 
 /**
- * add content to a channel
+ * Add content to a channel.
  * @see {@link https://github.com/flightstats/hub#insert-content-into-channel|Insert content into a Channel}
  * @param {string} name - channel name
  * @param {string} content - text content to add to channel
@@ -193,7 +265,32 @@ Datahub.prototype.addContent = function(name, content){
 };
 
 /**
- * get channel content
+ * Add channel content to the queue.
+ * It is sent when the queue reaches a max size or a period of time has elapsed.
+ * @param {string} name - channel name
+ * @param {string} content - text content to add to channel
+ */
+Datahub.prototype.addContentToQueue = function(name, content){
+  if (name && content) {
+    this.queue.curCount += 1;
+    if (!(name in this.queue.data)) {
+      this.queue.data[name] = [];
+    }
+
+    this.queue.data[name].push(content);;
+
+    if (this.queue.curCount >= this.config.queueMaxPending) {
+      this.stopQueue();
+      this.sendQueue();
+    }
+    else {
+      this.startQueue();
+    }
+  }
+};
+
+/**
+ * Get channel content.
  * @see {@link https://github.com/flightstats/hub#fetch-content-from-channel|Fetch content from a Channel}
  * @param {string} name - channel name
  * @param {string} id - content id
@@ -211,7 +308,7 @@ Datahub.prototype.getContent = function(name, id){
 };
 
 /**
- * get latest channel content
+ * Get latest channel content.
  * @see {@link https://github.com/flightstats/hub#fetch-latest-channel-item|Latest Channel Item}
  * @param {string} name - channel name
  * @param {number} [N] - retrieve the latest N items
@@ -230,7 +327,7 @@ Datahub.prototype.getLatest = function(name, N){
 };
 
 /**
- * get earliest channel content
+ * Get earliest channel content.
  * @see {@link https://github.com/flightstats/hub#fetch-earliest-channel-item|Earliest Channel Item}
  * @param {string} name - channel name
  * @param {number} [N] - retrieve the earliest N items
@@ -249,7 +346,7 @@ Datahub.prototype.getEarliest = function(name, N){
 };
 
 /**
- * get channel time
+ * Get channel time.
  * @see {@link https://github.com/flightstats/hub#time-interface|Channel Time}
  * @param {string} name - channel name
  */
@@ -262,7 +359,7 @@ Datahub.prototype.getTime = function(name){
 };
 
 /**
- * create a group callback
+ * Create a group callback.
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  * @param {Object} config - configuration details for new group callback
  * @param {string} config.name - group callback name
@@ -340,7 +437,7 @@ Datahub.prototype.createGroupCallback = function(config){
 };
 
 /**
- * update a group callback
+ * Update a group callback.
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  * @param {string} name - group name
  * @param {Object} config - updated configuration details for group
@@ -402,7 +499,7 @@ Datahub.prototype.updateGroupCallback = function(name, config){
 };
 
 /**
- * Get a list of existing group callbacks
+ * Get a list of existing group callbacks.
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  */
 Datahub.prototype.getGroupCallbacks = function(){
@@ -410,7 +507,7 @@ Datahub.prototype.getGroupCallbacks = function(){
 };
 
 /**
- * Get the configuration and status of an existing group callback
+ * Get the configuration and status of an existing group callback.
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  * @param {string} name - group callback name
  */
@@ -423,7 +520,7 @@ Datahub.prototype.getGroupCallback = function(name){
 };
 
 /**
- * Delete an existing group callback
+ * Delete an existing group callback.
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  * @param {string} name - group callback name
  */
@@ -436,7 +533,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
 };
 
 /**
- * Get content for first uri included in a callback
+ * Get content for first uri included in a callback.
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  * @param {string} data - group callback response data
  */
@@ -450,7 +547,7 @@ Datahub.prototype.getGroupCallbackContent = function(data) {
 };
 
 /**
- * Create/update a channel alert
+ * Create/update a channel alert.
  * @see {@link https://github.com/flightstats/hub#alerts|Alerts}
  * @param {string} name - alert name
  * @param {Object} config - configuration details for channel alert
@@ -508,7 +605,7 @@ Datahub.prototype.channelAlert = function(name, config){
   }
 
   if (_.isString(config.operator) &&
-    _.indexOf(['>=', '>', '==', '<', '<='], config.operator) !== -1) {
+    _.indexOf(['>=', '>', '==', '<', '<='], config.operator, 0) !== -1) {
     data.operator = config.operator;
   }
   else {
@@ -531,7 +628,7 @@ Datahub.prototype.channelAlert = function(name, config){
 };
 
 /**
- * Create/update a group alert
+ * Create/update a group alert.
  * @see {@link https://github.com/flightstats/hub#alerts|Alerts}
  * @param {string} name - alert name
  * @param {Object} config - configuration details for group alert
@@ -582,7 +679,7 @@ Datahub.prototype.groupAlert = function(name, config){
 };
 
 /**
- * Get channe/group alert status
+ * Get channel/group alert status.
  * @see {@link https://github.com/flightstats/hub#channel-alert-status|Channel Alert Status}
  * @see {@link https://github.com/flightstats/hub#group-alert-status|Channel Group Status}
  * @param {string} name - alert name

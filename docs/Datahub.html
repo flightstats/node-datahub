@@ -28,9 +28,7 @@
 
 <header>
     
-        <h2>
-        Datahub
-        </h2>
+        <h2>Datahub</h2>
         
     
 </header>
@@ -119,6 +117,8 @@
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -151,6 +151,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">datahub url</td>
@@ -185,8 +189,129 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">options passed to request-promise</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>queueEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">enable/disable the sending of channel data via a queue</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>queueTimerInterval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    10000
+                
+                </td>
+            
+
+            <td class="description last">the timer interval (in milliseconds) that is used for sending queued channel data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>queueMaxPending</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1000
+                
+                </td>
+            
+
+            <td class="description last">the maximum number of items held in the channel data queue before being sent</td>
         </tr>
 
     
@@ -234,7 +359,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line21">line 21</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line25">line 25</a>
     </li></ul></dd>
     
 
@@ -304,7 +429,7 @@
 
 
 <div class="description">
-    add content to a channel
+    Add content to a channel.
 </div>
 
 
@@ -420,7 +545,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line183">line 183</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line255">line 255</a>
     </li></ul></dd>
     
 
@@ -458,6 +583,161 @@
 
     
 
+    <h4 class="name" id="addContentToQueue"><span class="type-signature"></span>addContentToQueue<span class="signature">(name, content)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Add channel content to the queue.
+It is sent when the queue reaches a max size or a period of time has elapsed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">channel name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>content</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">text content to add to channel</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line273">line 273</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="alertStatus"><span class="type-signature"></span>alertStatus<span class="signature">(name)</span><span class="type-signature"></span></h4>
 
     
@@ -465,7 +745,7 @@
 
 
 <div class="description">
-    Get channe/group alert status
+    Get channel/group alert status.
 </div>
 
 
@@ -558,7 +838,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line590">line 590</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line687">line 687</a>
     </li></ul></dd>
     
 
@@ -605,7 +885,7 @@
 
 
 <div class="description">
-    Create/update a channel alert
+    Create/update a channel alert.
 </div>
 
 
@@ -862,7 +1142,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line463">line 463</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line560">line 560</a>
     </li></ul></dd>
     
 
@@ -907,7 +1187,7 @@
 
 
 <div class="description">
-    create a new channel
+    Create a new channel.
 </div>
 
 
@@ -1289,7 +1569,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line61">line 61</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line133">line 133</a>
     </li></ul></dd>
     
 
@@ -1334,7 +1614,7 @@
 
 
 <div class="description">
-    create a group callback
+    Create a group callback.
 </div>
 
 
@@ -1833,7 +2113,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line279">line 279</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line376">line 376</a>
     </li></ul></dd>
     
 
@@ -1878,7 +2158,7 @@
 
 
 <div class="description">
-    delete a specific channel
+    Delete a specific channel.
 </div>
 
 
@@ -1971,7 +2251,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line156">line 156</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line228">line 228</a>
     </li></ul></dd>
     
 
@@ -2016,7 +2296,7 @@
 
 
 <div class="description">
-    Delete an existing group callback
+    Delete an existing group callback.
 </div>
 
 
@@ -2109,7 +2389,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line430">line 430</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line527">line 527</a>
     </li></ul></dd>
     
 
@@ -2154,7 +2434,7 @@
 
 
 <div class="description">
-    get a specific channel
+    Get a specific channel.
 </div>
 
 
@@ -2247,7 +2527,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line143">line 143</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line215">line 215</a>
     </li></ul></dd>
     
 
@@ -2292,7 +2572,7 @@
 
 
 <div class="description">
-    get a list of channels
+    Get a list of channels.
 </div>
 
 
@@ -2336,7 +2616,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line134">line 134</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line206">line 206</a>
     </li></ul></dd>
     
 
@@ -2381,7 +2661,7 @@
 
 
 <div class="description">
-    get channel status
+    Get channel status.
 </div>
 
 
@@ -2474,7 +2754,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line169">line 169</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line241">line 241</a>
     </li></ul></dd>
     
 
@@ -2519,7 +2799,7 @@
 
 
 <div class="description">
-    get channel content
+    Get channel content.
 </div>
 
 
@@ -2635,7 +2915,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line201">line 201</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line298">line 298</a>
     </li></ul></dd>
     
 
@@ -2680,7 +2960,7 @@
 
 
 <div class="description">
-    get earliest channel content
+    Get earliest channel content.
 </div>
 
 
@@ -2816,7 +3096,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line238">line 238</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line335">line 335</a>
     </li></ul></dd>
     
 
@@ -2861,7 +3141,7 @@
 
 
 <div class="description">
-    Get the configuration and status of an existing group callback
+    Get the configuration and status of an existing group callback.
 </div>
 
 
@@ -2954,7 +3234,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line417">line 417</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line514">line 514</a>
     </li></ul></dd>
     
 
@@ -2999,7 +3279,7 @@
 
 
 <div class="description">
-    Get content for first uri included in a callback
+    Get content for first uri included in a callback.
 </div>
 
 
@@ -3092,7 +3372,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line443">line 443</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line540">line 540</a>
     </li></ul></dd>
     
 
@@ -3137,7 +3417,7 @@
 
 
 <div class="description">
-    Get a list of existing group callbacks
+    Get a list of existing group callbacks.
 </div>
 
 
@@ -3181,7 +3461,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line408">line 408</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line505">line 505</a>
     </li></ul></dd>
     
 
@@ -3226,7 +3506,7 @@
 
 
 <div class="description">
-    get latest channel content
+    Get latest channel content.
 </div>
 
 
@@ -3362,7 +3642,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line219">line 219</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line316">line 316</a>
     </li></ul></dd>
     
 
@@ -3407,7 +3687,7 @@
 
 
 <div class="description">
-    get channel time
+    Get channel time.
 </div>
 
 
@@ -3500,7 +3780,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line256">line 256</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line353">line 353</a>
     </li></ul></dd>
     
 
@@ -3545,7 +3825,7 @@
 
 
 <div class="description">
-    Create/update a group alert
+    Create/update a group alert.
 </div>
 
 
@@ -3756,7 +4036,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line542">line 542</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line639">line 639</a>
     </li></ul></dd>
     
 
@@ -3801,7 +4081,7 @@
 
 
 <div class="description">
-    update a channel
+    Update a channel.
 </div>
 
 
@@ -4134,7 +4414,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line104">line 104</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line176">line 176</a>
     </li></ul></dd>
     
 
@@ -4179,7 +4459,7 @@
 
 
 <div class="description">
-    update a group callback
+    Update a group callback.
 </div>
 
 
@@ -4555,7 +4835,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line354">line 354</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line451">line 451</a>
     </li></ul></dd>
     
 
@@ -4610,7 +4890,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 01 2015 12:18:04 GMT-0800 (PST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Dec 04 2015 15:59:35 GMT-0800 (PST)
 </footer>
 
 <script> prettyPrint(); </script>
