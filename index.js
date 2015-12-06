@@ -83,11 +83,12 @@ Datahub.prototype.sendQueue = function(){
     Promise.map(queueItems, function(queueItem) {
       return that.addContent(queueItem.channelName, queueItem.content)
         .then(function(resp) {
-          that.config.logger.log('Successfully added queue item content', queueItem.content);
+          that.config.logger.log('Successfully added ' + queueItem.content.length +
+            ' queued items to \'' + queueItem.channelName + '\'');
           return Promise.resolve();
         }, function(err) {
-          that.config.logger.error('Error adding queue item',
-            (err.message) ? err.message : err);
+          that.config.logger.error('Error adding queue item to \'' +
+            queueItem.channelName + '\'', (err.message) ? err.message : err);
           return Promise.resolve(); // don't reject whole queue if one queue item fails...
         });
     }, { concurrency: 10 })
@@ -277,7 +278,7 @@ Datahub.prototype.addContentToQueue = function(name, content){
       this.queue.data[name] = [];
     }
 
-    this.queue.data[name].push(content);;
+    this.queue.data[name].push(content);
 
     if (this.queue.curCount >= this.config.queueMaxPending) {
       this.stopQueue();
