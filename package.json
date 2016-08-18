@@ -7,7 +7,8 @@
     "test": "grunt test",
     "build": "babel src --ignore test.js --out-dir lib",
     "prepublish": "in-publish && npm run build",
-    "test-babel": "./node_modules/mocha/bin/mocha $(find tests -name '*-test.js') --compilers js:babel-core/register"
+    "test-babel": "./node_modules/mocha/bin/mocha $(find tests -name '*-test.js') --compilers js:babel-core/register",
+    "test-watcher": "./node_modules/mocha/bin/mocha tests/watcher-test.js --watch --compilers js:babel-core/register"
   },
   "keywords": [
     "FlightStats",

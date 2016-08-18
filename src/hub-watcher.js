@@ -32,20 +32,20 @@ const RESPONSE_HEADERS = {'Content-Type': 'text/json'};
 
 export default class HubWatcher {
   constructor(expressApp, config) {
-    if (!config) {
-      throw new Error('HubWatcher: Missing config');
+    if (!expressApp) {
+      throw new Error(`HubWatcher: Missing Express app`);
     }
 
-    if (!config.appHost || !config.appHost[env()]) {
-      throw new Error(`HubWatcher config: Missing "appHost.${env()}"`);
+    if (!config) {
+      throw new Error('HubWatcher: Missing config');
     }
 
     if (!config.hubHost || !config.appHost[env()]) {
       throw new Error(`HubWatcher config: Missing "hubHost.${env()}"`);
     }
 
-    if (!expressApp) {
-      throw new Error(`HubWatcher: Missing Express app`);
+    if (!config.appHost || !config.appHost[env()]) {
+      throw new Error(`HubWatcher config: Missing "appHost.${env()}"`);
     }
 
     if (typeof(expressApp.post) !== 'function') {
@@ -54,18 +54,23 @@ export default class HubWatcher {
 
     this.expressApp = expressApp;
     this.config = config;
-    // this.handlers = {};
     this.watchedChannels = [];
   }
 
   watchChannel(channelName, fnHandler) {
-    this.expressApp.post(`/`, this.postHandler(channelName, fnHandler));
+    this.expressApp.post(buildCallbackRoute(channelName), this.postHandler(channelName, fnHandler));
 
-    if (!this.watchedChannels.includes(channelName)) {
-      this.initWebhook(channelName).then(() => {
+    if (this.watchedChannels.indexOf(channelName) === -1) {
+      return this.initWebhook(channelName)
+      .then(() => {
         this.watchedChannels.push(channelName);
       });
     }
+    else {
+      console.log('webhook already initialized for', channelName);
+    }
+
+    return Promise.resolve();
   }
 
   postHandler(channelName, fnHandler) {
@@ -125,14 +130,15 @@ export default class HubWatcher {
       parallelCalls: this.config.hubParallelCalls,
     };
 
-    console.log('Getting group callback for', callbackConfig.name, 'on', this.config.hub.host);
+    const hubHost = this.config.hubHost[env()];
+    console.log('Getting group callback for', callbackConfig.name, 'on', hubHost);
 
     const datahub = new Datahub({
-      url: this.config.hub.host,
+      url: hubHost,
       requestPromiseOptions: { resolveWithFullResponse: true },
     });
 
-    return datahub.getGroupCallback(callbackName)
+    return datahub.getGroupCallback(buildCallbackName(channelName))
     .then((result) => {
       // if dev env, and if host is different, recreate group for current host
       const localCallbackUrl = callbackConfig.callbackUrl;
@@ -184,7 +190,7 @@ function getLocalIPAddress() {
     return localIPAddress;
   }
 
-  if (env == 'development') {
+  if (env() === 'development') {
     if (process.env.IP) {
       console.log("\n\nUsing IP environment variable:", process.env.IP, "\n\n");
       localIPAddress = process.env.IP;
@@ -218,7 +224,7 @@ function getLocalIPAddress() {
 }
 
 function buildCallbackName(channelName) {
-  return [channelName, process.env.NODE_ENV].join('_');
+  return [channelName, env()].join('_');
 }
 
 function buildCallbackRoute(channelName) {
