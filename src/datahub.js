@@ -1,5 +1,8 @@
-var rp = require('request-promise');
-var logger = console;
+import rp from 'request-promise';
+import _ from 'lodash';
+import Promise from 'bluebird';
+
+const logger = console;
 
   /**
    * Datahub
@@ -73,7 +76,7 @@ export default class Datahub {
       this.queue = { curCount: 0, data: {} };
 
       var queueItems = [];
-      queueItemsToParse.forEach((value, key) => {
+      _.forIn(queueItemsToParse, function (value, key) {
         queueItems.push({ channelName: key, content: value });
       });
 
@@ -403,13 +406,13 @@ export default class Datahub {
     }
 
     if (config.startItem) { data.startItem = config.startItem; }
-    if (config.paused) {
+    if (_.isBoolean(config.paused) && config.paused) {
       data.paused = true;
     }
     if (config.batch && (config.batch.toUpperCase() === 'SINGLE' || config.batch.toUpperCase() === 'MINUTE')) {
       data.batch = config.batch.toUpperCase();
     }
-    if (config.heartbeat) {
+    if (_.isBoolean(config.heartbeat) && config.heartbeat) {
       data.heartbeat = true;
     }
 
@@ -468,10 +471,10 @@ export default class Datahub {
       }
     }
 
-    if (config.paused) {
+    if (_.isBoolean(config.paused)) {
       data.paused = config.paused;
     }
-    if (config.heartbeat) {
+    if (_.isBoolean(config.heartbeat)) {
       data.heartbeat = config.heartbeat;
     }
 
