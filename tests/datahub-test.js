@@ -1,5 +1,3 @@
-/* global describe, beforeEach, it */
-'use strict';
 
 import { expect } from 'chai';
 import _  from 'lodash';

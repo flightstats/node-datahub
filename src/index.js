@@ -1,5 +1,10 @@
-import client from './client';
-import watcher from './watcher';
-import forwarder from './forwarder';
+import datahub from './datahub';
+import HubWatcher from './hub-watcher';
+import HubForwarder from './hub-forwarder';
 
-export default client;
+export default datahub;
+
+module.exports = {
+  HubWatcher,
+  HubForwarder,
+};

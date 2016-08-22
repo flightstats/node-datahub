@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import HubWatcher from '../src/hub-watcher';
+import { HubWatcher } from '../src/index.js';
 
 describe('node-datahub HubWatcher', function() {
 
@@ -74,7 +74,7 @@ describe('node-datahub HubWatcher', function() {
     expect(function(){
       const watcher = new HubWatcher(expressApp, config);
       watcher.watchChannel('some-channel', (hubItem, uri) => {
-        console.log('received hub item');
+        console.log('received hub item:', hubItem);
       })
       .then(done);
     }).to.not.throw(Error);
