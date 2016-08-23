@@ -46,14 +46,14 @@ const expressApp = express();
 
 const config = {
  hubHost: {
-   production: 'http://hub.svc.prod',
-   staging: 'http://hub.svc.staging',
-   test: 'http://hub.svc.dev',
-   development: 'http://hub.svc.dev',
+   production: 'http://hub.prod',
+   staging: 'http://hub.staging',
+   test: 'http://hub.dev',
+   development: 'http://hub.dev',
  },
  appHost: {
-   production: 'http://wma-email-sender.prod.flightstats.io:3000',
-   staging: 'http://wma-email-sender.staging.flightstats.io:3000',
+   production: 'http://my-app.prod:3000',
+   staging: 'http://my-app.staging:3000',
    test: 'http://localhost:3001',
    development: 'http://localhost:3000',
  },
