@@ -8,7 +8,7 @@
     "build": "babel src --ignore test.js --out-dir lib",
     "prepublish": "in-publish && npm run build",
     "test-babel": "./node_modules/mocha/bin/mocha $(find tests -name '*-test.js') --compilers js:babel-core/register",
-    "test-watcher": "./node_modules/mocha/bin/mocha tests/index.js --watch --compilers js:babel-core/register"
+    "test-watch": "./node_modules/mocha/bin/mocha tests/index.js --watch --compilers js:babel-core/register"
   },
   "keywords": [
     "FlightStats",

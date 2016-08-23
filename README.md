@@ -31,7 +31,7 @@ datahub.getChannels()
 
 Run the tests
 ```shell
-grunt test
+npm test
 ```
 
 ## HubWatcher & HubForwarder
