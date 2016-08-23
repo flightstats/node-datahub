@@ -34,13 +34,15 @@ Run the tests
 grunt test
 ```
 
-## watcher
+## HubWatcher & HubForwarder
 
-Use the HubWatcher
+### Config
 
 ```
-// EXAMPLE USAGE:
-import { HubWatcher } from 'node-datahub';
+import { HubWatcher, HubForwarder } from 'node-datahub';
+import express from 'express';
+
+const expressApp = express();
 
 const config = {
  hubHost: {
@@ -57,20 +59,40 @@ const config = {
  },
  hubParallelCalls: 2,
 };
-
-const watcher = new HubWatcher(expressApp, config);
-watcher.watchChannel('wma_email_outbox', sendEmail);
 ```
 
-## forwarder
+### HubWatcher
+
+Use the HubWatcher to receive process new hub channel items.
+
+```
+const watcher = new HubWatcher(expressApp, config);
+
+const doSomething = (hubChannelItem, hubItemURI) => {
+  console.log('New hub item', hubChannelItem, 'exists at', hubItemURI);
+};
+
+// Process each new hub channel item 
+watcher.watchChannel('some-channel', doSomething);
+
+```
+
+### HubForwarder
 
 Use the HubForwarder to receive an HTTP post to an Express route
-and then post the transformed input to a hub channel.
+and then post the transformed request to a hub channel.
 
 ```
-// See config for HubWatcher.
-const forwarder = new HubForwarder(app, config);
-forwarder.addHandler('/sendgrid/webhook', processSendgridWebhook, 'wma_email_receipts');
+const forwarder = new HubForwarder(expressApp, config);
+
+const xfm = (req) => {
+  // See http://expressjs.com/en/api.html#req
+  console.log('Transforming request to', req.originalUrl, 'Headers:', req.headers, 'Body:', req.body);
+  return req.body;
+};
+
+// Forward post requests from a route to a channel running an optional transformer.
+forwarder.forwardToChannel('/some/route', 'some-channel', xfm);
 
 ```
 
