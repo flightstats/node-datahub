@@ -67,7 +67,7 @@ export default class HubWatcher {
       });
     }
     else {
-      console.log('webhook already initialized for', channelName);
+      console.log('[node-datahub HubWatcher] webhook already initialized for', channelName);
     }
 
     return Promise.resolve();
@@ -101,7 +101,6 @@ export default class HubWatcher {
 
           return fnHandler(hubDataItemResponse.body, hubDataItemURI)
           .then((result) => {
-            console.log(`Result of ${channelName} handler:`, JSON.stringify(result));
             responseStatusCode = SUCCESS_STATUS_CODE;
           })
           .catch((err) => {
@@ -109,14 +108,14 @@ export default class HubWatcher {
           })
         })
         .catch((err) => {
-          console.error('Error getting', channelName, 'callback content:', err.message);
+          console.error('[node-datahub HubWatcher] Error getting', channelName, 'callback content:', err.message);
         })
         .then(() => {
           res.status(responseStatusCode).end();
         });
       }
       catch(err) {
-        console.error('Caught error getting', channelName, 'callback content:', err);
+        console.error('[node-datahub HubWatcher] Caught error getting', channelName, 'callback content:', err);
         res.status(responseStatusCode).end();
       }
     }
@@ -131,7 +130,6 @@ export default class HubWatcher {
     };
 
     const hubHost = this.config.hubHost[env()];
-    console.log('Getting group callback for', callbackConfig.name, 'on', hubHost);
 
     const datahub = new Datahub({
       url: hubHost,
@@ -144,15 +142,15 @@ export default class HubWatcher {
       const localCallbackUrl = callbackConfig.callbackUrl;
 
       if (result && result.body && result.body.callbackUrl !== localCallbackUrl) {
-        console.log('Updating group callback URL from', result.body.callbackUrl, 'to', callbackConfig.callbackUrl);
+        console.log('[node-datahub HubWatcher] Updating group callback URL from', result.body.callbackUrl, 'to', callbackConfig.callbackUrl);
 
         return datahub.deleteGroupCallback(callbackName)
         .then((result) => {
-          console.log('Deleted hub callback:', callbackName);
+          console.log('[node-datahub HubWatcher] Deleted hub callback:', callbackName);
           return createHubCallback(datahub, callbackConfig);
         })
         .catch((error) => {
-          console.error('Error deleting hub callback:', error.stack);
+          console.error('[node-datahub HubWatcher] Error deleting hub callback:', error.stack);
           done(error);
         }
         );
@@ -164,11 +162,11 @@ export default class HubWatcher {
     })
     .catch((error) => {
       if (error.statusCode == 404) {
-        console.log('Creating nonexistent callback', callbackConfig);
+        console.log('[node-datahub HubWatcher] Creating nonexistent callback', callbackConfig);
         return createHubCallback(datahub, callbackConfig);
       }
 
-      console.error("Error retrieving group callback:", error);
+      console.error('[node-datahub HubWatcher] Error retrieving group callback:', error);
       return null;
     });
   }
@@ -178,10 +176,10 @@ export default class HubWatcher {
 function createHubCallback(datahub, callbackConfig) {
   return datahub.createGroupCallback(callbackConfig)
   .then((result) => {
-    console.log('Created hub callback for', callbackConfig.name);
+    console.log('[node-datahub HubWatcher] Created hub callback for', callbackConfig.name);
   })
   .catch((error) => {
-    console.error('Failed to create callback:', error);
+    console.error('[node-datahub HubWatcher] Failed to create callback:', error);
   });
 }
 
@@ -192,13 +190,12 @@ function getLocalIPAddress() {
 
   if (env() === 'development') {
     if (process.env.IP) {
-      console.log("\n\nUsing IP environment variable:", process.env.IP, "\n\n");
       localIPAddress = process.env.IP;
       return process.env.IP;
     }
     else {
       const error = new Error('development env config error: Set your "IP" environment variable - use the 10.x.x.x one so the hub can find you.');
-      console.error('\n', error, '\n');
+      console.error('\n[node-datahub HubWatcher]', error, '\n');
       throw error;
     }
   }

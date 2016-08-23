@@ -83,11 +83,11 @@ export default class Datahub {
       Promise.map(queueItems, (queueItem) => {
         return that.addContent(queueItem.channelName, queueItem.content)
           .then(function(resp) {
-            that.config.logger.log('Successfully added ' + queueItem.content.length +
+            that.config.logger.log('[node-datahub] Successfully added ' + queueItem.content.length +
               ' queued items to \'' + queueItem.channelName + '\'');
             return Promise.resolve();
           }, function(err) {
-            that.config.logger.error('Error adding queued items to \'' +
+            that.config.logger.error('[node-datahub] Error adding queued items to \'' +
               queueItem.channelName + '\'', (err.message) ? err.message : err);
             return Promise.resolve(); // don't reject whole queue if one queue item fails...
           });
