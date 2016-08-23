@@ -30,6 +30,13 @@
  const RESPONSE_HEADERS = {'Content-Type': 'text/json'};
 
  export default class HubForwarder {
+
+  /**
+   * HubForwarder
+   * @constructor
+   * @param {Object} expressApp - an Express instance
+   * @param {Object} config - configuration object
+   */
   constructor(expressApp, config) {
     if (!expressApp) {
       throw new Error(`HubForwarder: Missing Express app`);

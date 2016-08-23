@@ -36,6 +36,10 @@ npm test
 
 ## HubWatcher & HubForwarder
 
+You can use an [Express](https://expressjs.com/) server to easily interact with new hub
+items and to forward incoming requests to a hub channel. These classes require Express 
+but extending them to support Koa or other servers wouldn't be too difficult.
+
 ### Config
 
 ```

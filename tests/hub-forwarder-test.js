@@ -3,9 +3,6 @@ import { HubForwarder } from '../src/index.js';
 import app from './app';
 import request from 'nodeunit-express';
  
-const testerInitializer = require('nodeunit-express/tester');
-// import testerInitializer from 'nodeunit-express/tester';
-
 var globalOptions = {
   prepare: function (res) {
     if (res.body != null) {
@@ -16,19 +13,8 @@ var globalOptions = {
   }
 };
 
-const tester = testerInitializer(globalOptions);
 const TEST_ROUTE = '/some/endpoint';
 const TEST_CHANNEL = 'some-test-channel';
-
-tester(app, {
-  uri: TEST_ROUTE,
-  method: 'POST',
-  body: {"some": "data"},
-  expect: {
-    statusCode: 201,
-    body: ''
-  }
-});
 
 describe('node-datahub HubForwarder', function() {
 
@@ -116,8 +102,10 @@ describe('node-datahub HubForwarder', function() {
   });
 
   it('should handle a post to test route', function(done) {
-    express.write('{"some":"data"}');
 
+    // simulate an incoming request
+    // TODO: find a better way to send post data to the handler
+    
     express.post(TEST_ROUTE).expect(function(response) {
       expect(response).to.not.be.null;
       expect(response.body).to.equal('');
