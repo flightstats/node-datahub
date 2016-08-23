@@ -31,5 +31,75 @@ datahub.getChannels()
 
 Run the tests
 ```shell
-grunt test
+npm test
 ```
+
+## HubWatcher & HubForwarder
+
+You can use an [Express](https://expressjs.com/) server to easily interact with new hub
+items and to forward incoming requests to a hub channel. These classes require Express 
+but extending them to support Koa or other servers wouldn't be too difficult.
+
+### Config
+
+```
+import { HubWatcher, HubForwarder } from 'node-datahub';
+import express from 'express';
+
+const expressApp = express();
+
+const config = {
+ hubHost: {
+   production: 'http://hub.prod',
+   staging: 'http://hub.staging',
+   test: 'http://hub.dev',
+   development: 'http://hub.dev',
+ },
+ appHost: {
+   production: 'http://my-app.prod:3000',
+   staging: 'http://my-app.staging:3000',
+   test: 'http://localhost:3001',
+   development: 'http://localhost:3000',
+ },
+ hubParallelCalls: 2,
+};
+```
+
+### HubWatcher
+
+Use the HubWatcher to receive process new hub channel items.
+
+```
+const watcher = new HubWatcher(expressApp, config);
+
+const doSomething = (hubChannelItem, hubItemURI) => {
+  console.log('New hub item', hubChannelItem, 'exists at', hubItemURI);
+};
+
+// Process each new hub channel item 
+watcher.watchChannel('some-channel', doSomething);
+
+```
+
+### HubForwarder
+
+Use the HubForwarder to receive an HTTP post to an Express route
+and then post the transformed request to a hub channel.
+
+```
+const forwarder = new HubForwarder(expressApp, config);
+
+const xfm = (req) => {
+  // See http://expressjs.com/en/api.html#req
+  console.log('Transforming request to', req.originalUrl, 'Headers:', req.headers, 'Body:', req.body);
+  return req.body;
+};
+
+// Forward post requests from a route to a channel running an optional transformer.
+forwarder.forwardToChannel('/some/route', 'some-channel', xfm);
+
+```
+
+
+
+

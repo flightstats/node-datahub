@@ -1,10 +1,14 @@
 {
   "name": "node-datahub",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Client for FlightStats DataHub",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "babel src --ignore test.js --out-dir lib",
+    "prepublish": "in-publish && npm run build",
+    "test-babel": "./node_modules/mocha/bin/mocha $(find tests -name '*-test.js') --compilers js:babel-core/register",
+    "test-watch": "./node_modules/mocha/bin/mocha tests/index.js --watch --compilers js:babel-core/register"
   },
   "keywords": [
     "FlightStats",
@@ -20,12 +24,14 @@
   "author": "Chris Wood",
   "license": "ISC",
   "dependencies": {
-    "bluebird": "^3.0.6",
-    "lodash": "^3.9.3",
-    "request-promise": "^0.4.2"
+    "request-promise": "^4.1.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.13.2",
+    "body-parser": "^1.15.2",
     "chai": "^3.0.0",
+    "express": "^4.14.0",
     "grunt": "^0.4.5",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-env": "^0.4.4",
@@ -34,6 +40,7 @@
     "load-grunt-tasks": "^3.2.0",
     "mocha": "^2.2.1",
     "nock": "^2.6.0",
+    "nodeunit-express": "0.0.5",
     "time-grunt": "^1.2.1"
   }
 }
