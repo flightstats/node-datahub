@@ -412,7 +412,7 @@ describe('node-datahub Datahub', function(){
       datahub.stopQueue();
       setTimeout(function() {
         expect(scope.isDone()).to.be.false;
-      }, 1000);
+      }, 4000);
     });
 
     it('should be finishable', function() {
@@ -429,7 +429,7 @@ describe('node-datahub Datahub', function(){
       }, 100);
       setTimeout(function() {
         expect(scope.isDone()).to.be.true;
-      }, 1000);
+      }, 2000);
     });
 
     it('should NOT send queue data that equals/exceeds queueMaxPending (queue disabled)', function(){
