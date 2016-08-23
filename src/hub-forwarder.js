@@ -64,7 +64,7 @@
   }
 
   forwardToChannel(routePath, channelName, fnTransformer) {
-    console.log('adding route', routePath);
+    console.log('[node-datahub HubForwarder] adding route', routePath);
     this.expressApp.post(routePath, this.postHandler(channelName, fnTransformer));
   }
 
@@ -108,19 +108,19 @@
 
         return datahub.addContent(channelName, transformedData)
         .then((hubRes) => {
-          console.log('Successfully forwarded request to hub channel', channelName);
+          console.log('[node-datahub HubForwarder] Successfully forwarded request to hub channel', channelName);
           responseStatusCode = SUCCESS_STATUS_CODE;
         })
         .catch((err) => {
-          console.log('Error forwarding request to hub channel', channelName, err.message);
+          console.log('[node-datahub HubForwarder] Error forwarding request to hub channel', channelName, err.message);
           responseStatusCode = FAILURE_STATUS_CODE;
         })
         .finally(() => {
           res.status(responseStatusCode).end();
         });
       }
-      catch(err) {
-        console.error('Caught error preparing or posting data to hub channel', channelName, err.message);
+      catch (err) {
+        console.error('[node-datahub HubForwarder] Caught error preparing or posting data to hub channel', channelName, err.message);
         res.status(responseStatusCode).end();
       }
     }
