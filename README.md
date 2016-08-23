@@ -61,3 +61,19 @@ const config = {
 const watcher = new HubWatcher(expressApp, config);
 watcher.watchChannel('wma_email_outbox', sendEmail);
 ```
+
+## forwarder
+
+Use the HubForwarder to receive an HTTP post to an Express route
+and then post the transformed input to a hub channel.
+
+```
+// See config for HubWatcher.
+const forwarder = new HubForwarder(app, config);
+forwarder.addHandler('/sendgrid/webhook', processSendgridWebhook, 'wma_email_receipts');
+
+```
+
+
+
+
