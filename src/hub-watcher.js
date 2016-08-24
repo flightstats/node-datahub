@@ -80,9 +80,15 @@ export default class HubWatcher {
       }
 
       let responseStatusCode = FAILURE_STATUS_CODE;
+      let requestBodyData = null;
 
       try {
-        var requestBodyData = JSON.parse(req.body);
+        if (typeof(req.body) === 'string') {
+          requestBodyData = JSON.parse(req.body);
+        }
+        else {
+          requestBodyData = req.body;
+        }
 
         const datahub = new Datahub({
           url: this.config.hubHost[env()],
@@ -136,7 +142,9 @@ export default class HubWatcher {
       requestPromiseOptions: { resolveWithFullResponse: true },
     });
 
-    return datahub.getGroupCallback(buildCallbackName(channelName))
+    const callbackName = buildCallbackName(channelName);
+
+    return datahub.getGroupCallback(callbackName)
     .then((result) => {
       // if dev env, and if host is different, recreate group for current host
       const localCallbackUrl = callbackConfig.callbackUrl;

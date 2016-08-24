@@ -516,7 +516,6 @@ export default class Datahub {
     if (!name) {
       return Promise.reject(new Error('Missing group name'));
     }
-
     return this._crud(this.config.url + '/group/' + name, 'GET');
   }
 
