@@ -89,7 +89,7 @@
         let transformedData = null;
 
         if (fnTransformer) {
-          transformedData = fnTransformer(requestBodyData) || {stuff:true};
+          transformedData = fnTransformer(req);
         }
         else {
           transformedData = requestBodyData;  
