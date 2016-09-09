@@ -196,19 +196,13 @@ function getLocalIPAddress() {
     return localIPAddress;
   }
 
-  if (env() === 'development') {
-    if (process.env.IP) {
-      localIPAddress = process.env.IP;
-      return process.env.IP;
-    }
-    else {
-      const error = new Error('development env config error: Set your "IP" environment variable - use the 10.x.x.x one so the hub can find you.');
-      console.error('\n[node-datahub HubWatcher]', error, '\n');
-      throw error;
-    }
+  if (process.env.IP) {
+    localIPAddress = process.env.IP;
+    console.log('[node-datahub HubWatcher] using IP environment variable for hub webhook:', localIPAddress);
   }
   else {
     const ifaces = os.networkInterfaces();
+    let firstIPAddress = null;
 
     for (let ifname in ifaces) {
       let ifaceAddresses = ifaces[ifname];
@@ -218,14 +212,31 @@ function getLocalIPAddress() {
 
         if (iface.family === 'IPv4' && !iface.internal) {
           // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+          
           localIPAddress = iface.address;
-          return iface.address;
+
+          if (env() === 'development') {
+            if (iface.address.search(/10\.*/) === 0) {
+              localIPAddress = iface.address;
+            }
+          }
+          else {
+            // Use the first IP
+            localIPAddress = localIPAddress || iface.address;
+          }
         }
       }
     }
+
+    console.log('[node-datahub HubWatcher] detected IP:', localIPAddress);
   }
 
-  throw new Error("Unable to get local IP address.");
+
+  if (!localIPAddress) {
+    throw new Error('Unable to get local IP address. Set the IP environment variable to your 10.x.x.x address.');
+  }
+
+  return localIPAddress;
 }
 
 function buildCallbackName(channelName) {
