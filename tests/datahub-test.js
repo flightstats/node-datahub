@@ -1,7 +1,7 @@
 
 import { expect } from 'chai';
 import _  from 'lodash';
-import Datahub from '../src/datahub';
+import Datahub from '../src/index';
 import nock from 'nock';
 
 describe('node-datahub Datahub', function(){

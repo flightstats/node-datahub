@@ -1,12 +1,12 @@
 {
   "name": "node-datahub",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "Client for FlightStats DataHub",
   "main": "lib/index.js",
   "scripts": {
     "test": "grunt test",
     "build": "babel src --ignore test.js --out-dir lib",
-    "prepublish": "in-publish && npm run build",
+    "prepublish": "npm run build",
     "test-babel": "./node_modules/mocha/bin/mocha $(find tests -name '*-test.js') --compilers js:babel-core/register",
     "test-watch": "./node_modules/mocha/bin/mocha tests/index.js --watch --compilers js:babel-core/register"
   },
