@@ -3,8 +3,5 @@ import HubWatcher from './hub-watcher';
 import HubForwarder from './hub-forwarder';
 
 export default datahub;
-
-module.exports = {
-  HubWatcher,
-  HubForwarder,
-};
+exports.HubWatcher = HubWatcher;
+exports.HubForwarder = HubForwarder;
