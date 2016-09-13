@@ -128,8 +128,10 @@ export default class HubWatcher {
   }
 
   initWebhook(channelName) {
+    const callbackName = buildCallbackName(channelName);
+
     const callbackConfig = {
-      name: buildCallbackName(channelName),
+      name: callbackName,
       channelName: channelName,
       callbackUrl: buildCallbackUrl(channelName, this.config.appHost[env()]),
       parallelCalls: this.config.hubParallelCalls,
@@ -142,7 +144,6 @@ export default class HubWatcher {
       requestPromiseOptions: { resolveWithFullResponse: true },
     });
 
-    const callbackName = buildCallbackName(channelName);
 
     return datahub.getGroupCallback(callbackName)
     .then((result) => {
@@ -240,7 +241,13 @@ function getLocalIPAddress() {
 }
 
 function buildCallbackName(channelName) {
-  return [channelName, env()].join('_');
+  let suffix = env();
+
+  if (['development', 'test'].indexOf(env()) !== -1) {
+    suffix = `${process.env.USER || getLocalIPAddress()}_${suffix}`;
+  }
+
+  return [channelName, suffix].join('_');
 }
 
 function buildCallbackRoute(channelName) {
