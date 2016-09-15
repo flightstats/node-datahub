@@ -27,6 +27,13 @@ describe('node-datahub Datahub', function(){
     }).to.throw(Error);
   });
 
+  it('should not throw an Error creating via require', function(){
+    var Datahub2 = require('../src/index');
+    expect(function(){
+      new Datahub2(config);
+    }).to.not.throw(Error);
+  });
+
   it('should not throw an Error', function(){
     expect(function(){
       new Datahub(config);
