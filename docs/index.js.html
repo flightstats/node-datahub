@@ -461,7 +461,7 @@ Datahub.prototype.createGroupCallback = function(config){
     }
   }
 
-  return this._crud(this.config.url + '/group/' + config.name, 'PUT', data);
+  return this._crud(this.config.url + '/webhook/' + config.name, 'PUT', data);
 };
 
 /**
@@ -523,7 +523,7 @@ Datahub.prototype.updateGroupCallback = function(name, config){
     }
   }
 
-  return this._crud(this.config.url + '/group/' + name, 'PUT', data);
+  return this._crud(this.config.url + '/webhook/' + name, 'PUT', data);
 };
 
 /**
@@ -531,7 +531,7 @@ Datahub.prototype.updateGroupCallback = function(name, config){
  * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
  */
 Datahub.prototype.getGroupCallbacks = function(){
-  return this._crud(this.config.url + '/group', 'GET');
+  return this._crud(this.config.url + '/webhook', 'GET');
 };
 
 /**
@@ -544,7 +544,7 @@ Datahub.prototype.getGroupCallback = function(name){
     return Promise.reject(new Error('Missing group name'));
   }
 
-  return this._crud(this.config.url + '/group/' + name, 'GET');
+  return this._crud(this.config.url + '/webhook/' + name, 'GET');
 };
 
 /**
@@ -557,7 +557,7 @@ Datahub.prototype.deleteGroupCallback = function(name){
     return Promise.reject(new Error('Missing group name'));
   }
 
-  return this._crud(this.config.url + '/group/' + name, 'DELETE');
+  return this._crud(this.config.url + '/webhook/' + name, 'DELETE');
 };
 
 /**

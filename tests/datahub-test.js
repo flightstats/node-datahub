@@ -652,7 +652,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 1', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback'
         })
@@ -668,7 +668,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 2', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback'
         })
@@ -687,7 +687,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 3', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
@@ -709,7 +709,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 4', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
@@ -737,7 +737,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 5', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           channelUrl: testHubUrl + '/channel/testChannel',
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
@@ -781,7 +781,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 1', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {})
+        .put('/webhook/testGroupCallback', {})
         .reply(200, {});
 
       promiseResolved(datahub.updateGroupCallback('testGroupCallback', {}), done);
@@ -790,7 +790,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 2', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback'
         })
         .reply(200, {});
@@ -806,7 +806,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 3', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
           maxWaitMinutes: 15,
@@ -825,7 +825,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 4', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
           paused: false,
@@ -848,7 +848,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 5', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .put('/group/testGroupCallback', {
+        .put('/webhook/testGroupCallback', {
           callbackUrl: 'http://somewhere.com/callback',
           parallelCalls: 10,
           paused: true,
@@ -875,7 +875,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise 6', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .get('/group')
+        .get('/webhook')
         .reply(200, { '_links': {
           groups: []
         }});
@@ -895,7 +895,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .get('/group/testGroupCallback')
+        .get('/webhook/testGroupCallback')
         .reply(200, {});
 
       promiseResolved(datahub.getGroupCallback('testGroupCallback'), done);
@@ -913,7 +913,7 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .delete('/group/testGroupCallback')
+        .delete('/webhook/testGroupCallback')
         .reply(202);
 
       promiseResolved(datahub.deleteGroupCallback('testGroupCallback'), done);
@@ -931,10 +931,10 @@ describe('node-datahub Datahub', function(){
     it('should return resolved promise', function(done) {
       var datahub = new Datahub(config);
       nock(testHubUrl)
-        .get('/group/testGroupCallback')
+        .get('/webhook/testGroupCallback')
         .reply(200, {});
 
-      promiseResolved(datahub.getGroupCallbackContent({uris:[testHubUrl + '/group/testGroupCallback']}), done);
+      promiseResolved(datahub.getGroupCallbackContent({uris:[testHubUrl + '/webhook/testGroupCallback']}), done);
     });
 
   });

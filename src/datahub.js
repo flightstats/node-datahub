@@ -434,7 +434,7 @@ export default class Datahub {
       }
     }
 
-    return this._crud(this.config.url + '/group/' + config.name, 'PUT', data);
+    return this._crud(this.config.url + '/webhook/' + config.name, 'PUT', data);
   }
 
   /**
@@ -496,7 +496,7 @@ export default class Datahub {
       }
     }
 
-    return this._crud(this.config.url + '/group/' + name, 'PUT', data);
+    return this._crud(this.config.url + '/webhook/' + name, 'PUT', data);
   }
 
   /**
@@ -504,7 +504,7 @@ export default class Datahub {
    * @see {@link https://github.com/flightstats/hub#group-callback|Group Callbacks}
    */
   getGroupCallbacks() {
-    return this._crud(this.config.url + '/group', 'GET');
+    return this._crud(this.config.url + '/webhook', 'GET');
   }
 
   /**
@@ -516,7 +516,7 @@ export default class Datahub {
     if (!name) {
       return Promise.reject(new Error('Missing group name'));
     }
-    return this._crud(this.config.url + '/group/' + name, 'GET');
+    return this._crud(this.config.url + '/webhook/' + name, 'GET');
   }
 
   /**
@@ -529,7 +529,7 @@ export default class Datahub {
       return Promise.reject(new Error('Missing group name'));
     }
 
-    return this._crud(this.config.url + '/group/' + name, 'DELETE');
+    return this._crud(this.config.url + '/webhook/' + name, 'DELETE');
   }
 
   /**
