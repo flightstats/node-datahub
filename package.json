@@ -1,6 +1,6 @@
 {
   "name": "node-datahub",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Client for FlightStats DataHub",
   "main": "lib/index.js",
   "scripts": {
@@ -24,6 +24,7 @@
   "author": "Chris Wood",
   "license": "ISC",
   "dependencies": {
+    "request": "^2.76.0",
     "request-promise": "^4.1.1"
   },
   "devDependencies": {
