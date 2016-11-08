@@ -114,7 +114,7 @@ export default class HubWatcher {
           })
         })
         .catch((err) => {
-          console.error('[node-datahub HubWatcher] Error getting', channelName, 'callback content:', err.message);
+          console.error('[node-datahub HubWatcher] Error getting', channelName, 'callback content:', err);
         })
         .then(() => {
           res.status(responseStatusCode).end();
