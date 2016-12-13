@@ -40,7 +40,7 @@ export default class HubWatcher {
       throw new Error('HubWatcher: Missing config');
     }
 
-    if (!config.hubHost || !config.appHost[env()]) {
+    if (!config.hubHost || !config.hubHost[env()]) {
       throw new Error(`HubWatcher config: Missing "hubHost.${env()}"`);
     }
 
