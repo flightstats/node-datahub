@@ -58,6 +58,7 @@ export default class HubWatcher {
   }
 
   watchChannel(channelName, fnHandler) {
+    console.log('Registering callback route: ', buildCallbackRoute(channelName));
     this.expressApp.post(buildCallbackRoute(channelName), this.postHandler(channelName, fnHandler));
 
     if (this.watchedChannels.indexOf(channelName) === -1) {
