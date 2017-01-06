@@ -1,6 +1,7 @@
 import rp from 'request-promise';
 import _ from 'lodash';
 import Promise from 'bluebird';
+import objectAssign from 'object-assign';
 
 const logger = console;
 
@@ -23,7 +24,7 @@ const logger = console;
    */
 export default class Datahub {
   constructor(config) {
-    this.config = Object.assign({
+    this.config = objectAssign({
       url: null,
       logger: logger,
       queueEnabled: true,
@@ -107,7 +108,7 @@ export default class Datahub {
     };
 
     if (this.config.requestPromiseOptions) {
-      options = Object.assign(options, this.config.requestPromiseOptions);
+      options = objectAssign(options, this.config.requestPromiseOptions);
     }
 
     if (method === 'GET') {
