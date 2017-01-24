@@ -94,7 +94,8 @@ export default class HubWatcher {
         const datahub = new Datahub({
           url: this.config.hubHost[env()],
           requestPromiseOptions: {
-            resolveWithFullResponse: true
+            resolveWithFullResponse: true,
+            json: this.config.json,
           },
         });
 
