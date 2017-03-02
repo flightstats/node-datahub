@@ -24,6 +24,7 @@ watcher.watchChannel('wma_email_outbox', sendEmail);
 
 import Datahub from './datahub';
 import os from 'os';
+import { sanitizeURL } from './util';
 
 let localIPAddress = null;
 const SUCCESS_STATUS_CODE = 200;
@@ -258,7 +259,7 @@ function buildCallbackRoute(channelName) {
 
 function buildCallbackUrl(channelName, appHost) {
   const callbackUrl = appHost + buildCallbackRoute(channelName);
-  return callbackUrl.replace(/localhost/, getLocalIPAddress());
+  return sanitizeURL(callbackUrl.replace(/localhost/, getLocalIPAddress()));
 }
 
 function env() {

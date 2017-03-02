@@ -27,6 +27,21 @@ describe('node-datahub Datahub', function(){
     }).to.throw(Error);
   });
 
+  it('should sanitize datahub url', function(){
+    var hub = new Datahub({
+      url: 'noScheme.com'
+    });
+    expect(hub.config.url.indexOf('http://')).to.equal(0);
+  });
+
+  it('should sanitize datahub url (2)', function(){
+    var url = 'HTTPS://noScheme.com';
+    var hub = new Datahub({
+      url: url
+    });
+    expect(hub.config.url).to.equal(url.toLowerCase());
+  });
+
   it('should not throw an Error creating via require', function(){
     var Datahub2 = require('../src/index');
     expect(function(){

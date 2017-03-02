@@ -2,6 +2,7 @@ import rp from 'request-promise';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import objectAssign from 'object-assign';
+import { isString, sanitizeURL } from './util';
 
 const logger = console;
 
@@ -35,6 +36,8 @@ export default class Datahub {
     if (!this.config.url) {
       throw new Error('Missing datahub URL');
     }
+
+    this.config.url = sanitizeURL(this.config.url);
 
     this.queueShouldFinish = false;
     this.queue = { curCount: 0, data: {} }; // { curCount: X, data: { channelName1: content, channelName2: content, ... } }
@@ -693,5 +696,3 @@ export default class Datahub {
     return this._crud(this.config.url + '/alert/' + name, 'GET');
   }
 }
-
-const isString = (o) => (typeof(o) === 'string' || Object.toString(o) === '[Object String]');
