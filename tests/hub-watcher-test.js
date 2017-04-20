@@ -5,16 +5,17 @@ describe('node-datahub HubWatcher', function() {
 
   const testHubUrl = 'http://hub';
   let config;
+  let config2;
   let expressApp = null;
   let watcher = null;
 
   beforeEach(function() {
     config = {
       hubHost: {
-        production: 'http://hub.svc.prod',
-        staging: 'http://hub.svc.staging',
-        test: 'http://hub.svc.dev',
-        development: 'http://hub.svc.dev',
+        production: 'http://hub.iad.prod.flightstats.io',
+        staging: 'http://hub.iad.staging.flightstats.io',
+        test: 'http://hub.iad.dev.flightstats.io',
+        development: 'http://hub.iad.dev.flightstats.io',
       },
       appHost: {
         production: 'http://wma-email-sender.prod.flightstats.io:3000',
@@ -23,6 +24,12 @@ describe('node-datahub HubWatcher', function() {
         development: 'http://localhost:3000',
       },
       hubParallelCalls: 2,
+    };
+
+    config2 = {
+      hubHost: config.hubHost.test,
+      appHost: config.appHost.test,
+      hubParallelCalls: config.hubParallelCalls,
     };
 
     expressApp = {
@@ -36,6 +43,12 @@ describe('node-datahub HubWatcher', function() {
   it('should not throw an Error with valid args', function(){
     expect(function(){
       new HubWatcher(expressApp, config);
+    }).to.not.throw(Error);
+  });
+
+  it('should not throw an Error with valid simpler args', function(){
+    expect(function(){
+      new HubWatcher(expressApp, config2);
     }).to.not.throw(Error);
   });
 
@@ -60,8 +73,22 @@ describe('node-datahub HubWatcher', function() {
 
   it('should throw an Error if no appHost is supplied', function(){
     expect(function(){
-      expressApp.post = null;
+      config.appHost = null;
       new HubWatcher(expressApp, config);
+    }).to.throw(Error);
+  });
+
+  it('should throw an Error if no hubHost is supplied with simpler args', function(){
+    expect(function(){
+      config2.hubHost = null;
+      new HubWatcher(expressApp, config2);
+    }).to.throw(Error);
+  });
+
+  it('should throw an Error if no appHost is supplied with simpler args', function(){
+    expect(function(){
+      config2.appHost = null;
+      new HubWatcher(expressApp, config2);
     }).to.throw(Error);
   });
 
@@ -71,8 +98,20 @@ describe('node-datahub HubWatcher', function() {
   });
 
   it('should not throw an Error when watchChannel is called', function(done){
+    this.timeout = 30000;
     expect(function(){
       const watcher = new HubWatcher(expressApp, config);
+      watcher.watchChannel('some-channel', (hubItem, uri) => {
+        console.log('received hub item:', hubItem);
+      })
+      .then(done);
+    }).to.not.throw(Error);
+  });
+
+  it('should not throw an Error when watchChannel is called with simpler args', function(done){
+    this.timeout = 30000;
+    expect(function(){
+      const watcher = new HubWatcher(expressApp, config2);
       watcher.watchChannel('some-channel', (hubItem, uri) => {
         console.log('received hub item:', hubItem);
       })
