@@ -26,10 +26,10 @@ describe('node-datahub HubForwarder', function() {
   beforeEach(function() {
     config = {
       hubHost: {
-        production: 'http://hub.svc.prod',
-        staging: 'http://hub.svc.staging',
-        test: 'http://hub.svc.dev',
-        development: 'http://hub.svc.dev',
+        production: 'http://hub.iad.prod.flightstats.io',
+        staging: 'http://hub.iad.staging.flightstats.io',
+        test: 'http://hub.iad.dev.flightstats.io',
+        development: 'http://hub.iad.dev.flightstats.io',
       },
       appHost: {
         production: 'http://wma-email-sender.prod.flightstats.io:3000',
