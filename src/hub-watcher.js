@@ -1,7 +1,15 @@
 /*
 
 EXAMPLE USAGE:
-const config = {
+
+// Choose one of two config types
+const simpleConfig = {
+  hubHost: 'http://hub.iad.dev.flightstats.io',
+  appHost: 'http://localhost:3001',
+  hubParallelCalls: 2,
+};
+
+const environmentConfig = {
   hubHost: {
     production: 'http://hub.iad.prod.flightstats.io',
     staging: 'http://hub.iad.staging.flightstats.io',
@@ -17,7 +25,7 @@ const config = {
   hubParallelCalls: 2,
 };
 
-const watcher = new HubWatcher(expressApp, config);
+const watcher = new HubWatcher(expressApp, simpleConfig);
 watcher.watchChannel('wma_email_outbox', sendEmail);
 
  */
@@ -56,6 +64,14 @@ export default class HubWatcher {
     this.expressApp = expressApp;
     this.config = config;
     this.watchedChannels = [];
+  }
+
+  get appHost() {
+    return this.config.appHost[env()] || this.config.appHost;
+  }
+
+  get hubHost() {
+    return this.config.hubHost[env()] || this.config.hubHost;
   }
 
   watchChannel(channelName, fnHandler) {
@@ -128,14 +144,6 @@ export default class HubWatcher {
         res.status(responseStatusCode).end();
       }
     }
-  }
-
-  get appHost() {
-    return this.config.appHost[env()] || this.config.appHost;
-  }
-
-  get hubHost() {
-    return this.config.hubHost[env()] || this.config.hubHost;
   }
 
   initWebhook(channelName) {

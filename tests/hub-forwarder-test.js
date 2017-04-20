@@ -20,6 +20,7 @@ describe('node-datahub HubForwarder', function() {
 
   const testHubUrl = 'http://hub';
   let config;
+  let config2;
   let forwarder = null;
   const express = request(app);
 
@@ -31,13 +32,10 @@ describe('node-datahub HubForwarder', function() {
         test: 'http://hub.iad.dev.flightstats.io',
         development: 'http://hub.iad.dev.flightstats.io',
       },
-      appHost: {
-        production: 'http://wma-email-sender.prod.flightstats.io:3000',
-        staging: 'http://wma-email-sender.staging.flightstats.io:3000',
-        test: 'http://localhost:3001',
-        development: 'http://localhost:3000',
-      },
-      hubParallelCalls: 2,
+    };
+
+    config2 = {
+      hubHost: 'http://hub.iad.dev.flightstats.io',
     };
 
     // app = {
@@ -51,6 +49,12 @@ describe('node-datahub HubForwarder', function() {
   it('should not throw an Error with valid args', function(){
     expect(function(){
       new HubForwarder(app, config);
+    }).to.not.throw(Error);
+  });
+
+  it('should not throw an Error with valid simpler args', function(){
+    expect(function(){
+      new HubForwarder(app, config2);
     }).to.not.throw(Error);
   });
 
@@ -73,6 +77,13 @@ describe('node-datahub HubForwarder', function() {
     }).to.throw(Error);
   });
 
+  it('should throw an Error if no hubHost is supplied with simpler args', function(){
+    expect(function(){
+      config2.hubHost = null;
+      new HubForwarder(app, config2);
+    }).to.throw(Error);
+  });
+
   it('should define forwardToChannel()', function(){
     const forwarder = new HubForwarder(app, config);
     expect(forwarder.forwardToChannel).to.not.be.empty;
@@ -81,6 +92,18 @@ describe('node-datahub HubForwarder', function() {
   it('should not throw an Error when forwardToChannel is called', function(){
     expect(function(){
       const forwarder = new HubForwarder(app, config);
+
+      forwarder.forwardToChannel(TEST_ROUTE, TEST_CHANNEL, (request) => {
+        // console.log('received post:', request && request.body);
+        return {transformed: true};
+      });
+
+    }).to.not.throw(Error);
+  });
+
+  it('should not throw an Error when forwardToChannel is called with simpler config', function(){
+    expect(function(){
+      const forwarder = new HubForwarder(app, config2);
 
       forwarder.forwardToChannel(TEST_ROUTE, TEST_CHANNEL, (request) => {
         // console.log('received post:', request && request.body);

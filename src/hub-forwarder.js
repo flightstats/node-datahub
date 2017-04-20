@@ -1,23 +1,21 @@
  /*
 
  EXAMPLE USAGE:
- const config = {
+ // Choose one of two config types
+ const simpleConfig = {
+   hubHost: 'http://hub.iad.dev.flightstats.io',
+ };
+ 
+ const environmentConfig = {
    hubHost: {
      production: 'http://hub.iad.prod.flightstats.io',
      staging: 'http://hub.iad.staging.flightstats.io',
      test: 'http://hub.iad.dev.flightstats.io',
      development: 'http://hub.iad.dev.flightstats.io',
    },
-   appHost: {
-     production: 'http://wma-email-sender.prod.flightstats.io:3000',
-     staging: 'http://wma-email-sender.staging.flightstats.io:3000',
-     test: 'http://localhost:3001',
-     development: 'http://localhost:3000',
-   },
-   hubParallelCalls: 2,
  };
-
- const forwarder = new HubForwarder(app, conf);
+ 
+ const forwarder = new HubForwarder(app, simpleConfig);
  forwarder.forwardToChannel('/sendgrid/webhook', 'wma_email_receipts', processSendgridWebhook);
 
  */
@@ -46,12 +44,8 @@
       throw new Error('HubForwarder: Missing config');
     }
 
-    if (!config.hubHost || !config.appHost[env()]) {
-      throw new Error(`HubForwarder config: Missing "hubHost.${env()}"`);
-    }
-
-    if (!config.appHost || !config.appHost[env()]) {
-      throw new Error(`HubForwarder config: Missing "appHost.${env()}"`);
+    if (!((config.hubHost && config.hubHost[env()]) || config.hubHost)) {
+      throw new Error(`HubWatcher config: Missing "hubHost" or "hubHost.${env()}"`);
     }
 
     if (typeof(expressApp.post) !== 'function') {
@@ -61,6 +55,10 @@
     this.expressApp = expressApp;
     this.config = config;
     this.watchedChannels = [];
+  }
+
+  get hubHost() {
+    return this.config.hubHost[env()] || this.config.hubHost;
   }
 
   forwardToChannel(routePath, channelName, fnTransformer) {
@@ -100,7 +98,7 @@
         }
 
         const datahub = new Datahub({
-          url: this.config.hubHost[env()],
+          url: this.hubHost,
           requestPromiseOptions: {
             resolveWithFullResponse: true
           },
