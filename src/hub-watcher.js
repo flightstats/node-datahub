@@ -260,7 +260,7 @@ function getLocalIPAddress() {
 function buildCallbackName(channelName) {
   let suffix = env();
 
-  if (['development', 'test'].indexOf(env()) !== -1) {
+  if (['staging', 'production'].indexOf(env()) === -1) {
     suffix = `${process.env.USER || getLocalIPAddress().replace(/\./g, '_')}_${suffix}`;
   }
 

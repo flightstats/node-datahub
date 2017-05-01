@@ -438,6 +438,7 @@ describe('node-datahub Datahub', function(){
     });
 
     it('should be finishable', function() {
+      this.timeout = 20000;
       var datahub = new Datahub(config);
       var scope = nock(testHubUrl)
         .post('/channel/testChannel', [{ foo: 'bar' }])
