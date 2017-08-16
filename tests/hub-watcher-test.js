@@ -24,12 +24,14 @@ describe('node-datahub HubWatcher', function() {
         development: 'http://localhost:3000',
       },
       hubParallelCalls: 2,
+      webhookName: 'my_webhook',
     };
 
     config2 = {
       hubHost: config.hubHost.test,
       appHost: config.appHost.test,
       hubParallelCalls: config.hubParallelCalls,
+      webhookName: 'my_webhook',
     };
 
     expressApp = {

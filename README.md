@@ -37,7 +37,7 @@ npm test
 ## HubWatcher & HubForwarder
 
 You can use an [Express](https://expressjs.com/) server to easily interact with new hub
-items and to forward incoming requests to a hub channel. These classes require Express 
+items and to forward incoming requests to a hub channel. These classes require Express
 but extending them to support Koa or other servers wouldn't be too difficult.
 
 ### Config
@@ -62,6 +62,7 @@ const config = {
    development: 'http://localhost:3000',
  },
  hubParallelCalls: 2,
+ webhookName: 'my_webhook'
 };
 ```
 
@@ -76,7 +77,7 @@ const doSomething = (hubChannelItem, hubItemURI) => {
   console.log('New hub item', hubChannelItem, 'exists at', hubItemURI);
 };
 
-// Process each new hub channel item 
+// Process each new hub channel item
 watcher.watchChannel('some-channel', doSomething);
 
 ```
@@ -99,7 +100,3 @@ const xfm = (req) => {
 forwarder.forwardToChannel('/some/route', 'some-channel', xfm);
 
 ```
-
-
-
-
