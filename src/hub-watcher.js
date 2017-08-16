@@ -49,6 +49,10 @@ export default class HubWatcher {
       throw new Error('HubWatcher: Missing config');
     }
 
+    if (!config.webhookName) {
+      throw new Error('HubWatcher: Missing webhookName');
+    }
+
     if (!((config.hubHost && config.hubHost[env()]) || config.hubHost)) {
       throw new Error(`HubWatcher config: Missing "hubHost" or "hubHost.${env()}"`);
     }
@@ -147,7 +151,7 @@ export default class HubWatcher {
   }
 
   initWebhook(channelName) {
-    const callbackName = buildCallbackName(channelName);
+    const callbackName = buildCallbackName(this.config.webhookName);
 
     const callbackConfig = {
       name: callbackName,
@@ -230,7 +234,7 @@ function getLocalIPAddress() {
 
         if (iface.family === 'IPv4' && !iface.internal) {
           // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-          
+
           localIPAddress = iface.address;
 
           if (env() === 'development') {
@@ -257,14 +261,14 @@ function getLocalIPAddress() {
   return localIPAddress;
 }
 
-function buildCallbackName(channelName) {
+function buildCallbackName(webhookName) {
   let suffix = env();
 
   if (['staging', 'production'].indexOf(env()) === -1) {
     suffix = `${process.env.USER || getLocalIPAddress().replace(/\./g, '_')}_${suffix}`;
   }
 
-  return [channelName, suffix].join('_');
+  return [webhookName, suffix].join('_');
 }
 
 function buildCallbackRoute(channelName) {
