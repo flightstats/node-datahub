@@ -160,6 +160,10 @@ export default class HubWatcher {
       parallelCalls: this.config.hubParallelCalls,
     };
 
+    if (this.config.startItem) {
+      callbackConfig.startItem = this.config.startItem;
+    }
+
     const datahub = new Datahub({
       url: this.hubHost,
       requestPromiseOptions: { resolveWithFullResponse: true },
