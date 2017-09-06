@@ -540,9 +540,12 @@ describe('node-datahub Datahub', function(){
     });
 
     it('should send queue data and execute a callback if defined', function() {
-      var callbackResult;
-      var callbackFn = (queueResults) => {
-          callbackResult = queueResults;
+      var callbackResult, queueItemsSent;
+      var callbackFn = (hubResponse, queueItems) => {
+          callbackResult = hubResponse;
+          queueItemsSent = queueItems;
+
+          console.log(queueItemsSent);
       };
       var datahub = new Datahub(Object.assign(config, {
           'queueFinishedCallback': callbackFn
@@ -560,6 +563,7 @@ describe('node-datahub Datahub', function(){
         expect(callbackResult.length).to.equal(1);
         expect(callbackResult[0]._links.channel.href)
             .to.equal('http://hub/channel/testChannelWithCallback');
+        expect(queueItemsSent.length).to.equal(1);
       }, 1000);
     });
 
