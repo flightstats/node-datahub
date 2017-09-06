@@ -49,9 +49,15 @@ describe('node-datahub Datahub', function(){
     }).to.not.throw(Error);
   });
 
+  it('should throw an Error if queue finished callback defined is not a function', function(){
+    expect(function(){
+      new Datahub(Object.assign(config, { 'queueFinishedCallback': 12345 }));
+    }).to.throw(Error);
+  });
+
   it('should not throw an Error', function(){
     expect(function(){
-      new Datahub(config);
+      new Datahub(Object.assign(config, { 'queueFinishedCallback': () => {} }));
     }).to.not.throw(Error);
   });
 
@@ -490,7 +496,7 @@ describe('node-datahub Datahub', function(){
           { foo2: 'bar2' },
           { foo3: 'bar3' }
         ])
-        .reply(200, { });
+        .reply(200, { 'channel': 'testChannelA' });
       var scope2 = nock(testHubUrl)
         .post('/channel/testChannelB', [
           { foo50: 'bar50' },
@@ -505,7 +511,7 @@ describe('node-datahub Datahub', function(){
           { foo153: 'bar153' },
           { foo154: 'bar154' }
         ])
-        .reply(200, { });
+        .reply(200, { 'channel': 'testChannelC' });
 
       // first two have insufficient params to be added to queue
       datahub.addContentToQueue();
@@ -530,6 +536,30 @@ describe('node-datahub Datahub', function(){
       }, 1000);
       setTimeout(function(){
         expect(scope3.isDone()).to.be.true;
+      }, 1000);
+    });
+
+    it('should send queue data and execute a callback if defined', function() {
+      var callbackResult;
+      var callbackFn = (queueResults) => {
+          callbackResult = queueResults;
+      };
+      var datahub = new Datahub(Object.assign(config, {
+          'queueFinishedCallback': callbackFn
+      }));
+      var scope = nock(testHubUrl)
+        .post('/channel/testChannelWithCallback', [{ foo: 'bar' }])
+        .reply(200, { '_links': { 'channel': {
+            'href': 'http://hub/channel/testChannelWithCallback' }
+        }});
+
+      datahub.addContentToQueue('testChannelWithCallback', { foo: 'bar' });
+      datahub.sendQueue();
+      setTimeout(function() {
+        expect(scope.isDone()).to.be.true;
+        expect(callbackResult.length).to.equal(1);
+        expect(callbackResult[0]._links.channel.href)
+            .to.equal('http://hub/channel/testChannelWithCallback');
       }, 1000);
     });
 

@@ -1,4 +1,32 @@
-import rp from 'request-promise';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: datahub.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: datahub.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import rp from 'request-promise';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import objectAssign from 'object-assign';
@@ -39,7 +67,7 @@ export default class Datahub {
       throw new Error('Missing datahub URL');
     }
 
-    if (this.config.queueFinishedCallback &&
+    if (this.config.queueFinishedCallback &amp;&amp;
         !_.isFunction(this.config.queueFinishedCallback)) {
       throw new Error('Queue finished callback should be a function');
     }
@@ -81,7 +109,7 @@ export default class Datahub {
   }
 
   sendQueue() {
-    if (this.config.queueEnabled && this.queue.curCount > 0) {
+    if (this.config.queueEnabled &amp;&amp; this.queue.curCount > 0) {
       var that = this;
       var queueItemsToParse = this.queue.data;
       this.queue = { curCount: 0, data: {} };
@@ -171,7 +199,7 @@ export default class Datahub {
     if (config.description) { data.description = config.description; }
     if (config.tags) { data.tags = config.tags; }
     if (config.replicationSource) { data.replicationSource = config.replicationSource; }
-    if (config.storage && (config.storage.toUpperCase() === 'SINGLE' || config.storage.toUpperCase() === 'BATCH')) {
+    if (config.storage &amp;&amp; (config.storage.toUpperCase() === 'SINGLE' || config.storage.toUpperCase() === 'BATCH')) {
       data.storage = config.storage.toUpperCase();
     }
 
@@ -287,7 +315,7 @@ export default class Datahub {
    * @param {string} content - text content to add to channel
    */
   addContentToQueue(name, content) {
-    if (name && content) {
+    if (name &amp;&amp; content) {
       this.queue.curCount += 1;
       if (!(name in this.queue.data)) {
         this.queue.data[name] = [];
@@ -334,7 +362,7 @@ export default class Datahub {
       return Promise.reject(new Error('Missing channel name'));
     }
 
-    if (N && !Number.isFinite(N)) {
+    if (N &amp;&amp; !Number.isFinite(N)) {
       return Promise.reject(new Error('Invalid number parameter'));
     }
 
@@ -353,7 +381,7 @@ export default class Datahub {
       return Promise.reject(new Error('Missing channel name'));
     }
 
-    if (N && !Number.isFinite(N)) {
+    if (N &amp;&amp; !Number.isFinite(N)) {
       return Promise.reject(new Error('Invalid number parameter'));
     }
 
@@ -421,13 +449,13 @@ export default class Datahub {
     }
 
     if (config.startItem) { data.startItem = config.startItem; }
-    if (_.isBoolean(config.paused) && config.paused) {
+    if (_.isBoolean(config.paused) &amp;&amp; config.paused) {
       data.paused = true;
     }
-    if (config.batch && (config.batch.toUpperCase() === 'SINGLE' || config.batch.toUpperCase() === 'MINUTE')) {
+    if (config.batch &amp;&amp; (config.batch.toUpperCase() === 'SINGLE' || config.batch.toUpperCase() === 'MINUTE')) {
       data.batch = config.batch.toUpperCase();
     }
-    if (_.isBoolean(config.heartbeat) && config.heartbeat) {
+    if (_.isBoolean(config.heartbeat) &amp;&amp; config.heartbeat) {
       data.heartbeat = true;
     }
 
@@ -569,7 +597,7 @@ export default class Datahub {
    * @param {string} config.source - name of the channel to monitor
    * @param {string} config.serviceName - user defined end point for the alert
    * @param {number} config.timeWindowMinutes - period of time to evaluate
-   * @param {string} config.operator - can be '>=', '>', '==', '<', or '<='
+   * @param {string} config.operator - can be '>=', '>', '==', '&lt;', or '&lt;='
    * @param {number} config.threshold - value to compare
    */
   channelAlert(name, config) {
@@ -619,8 +647,8 @@ export default class Datahub {
       return Promise.reject(new Error('Invalid alert time window'));
     }
 
-    if (isString(config.operator) &&
-      ['>=', '>', '==', '<', '<='].indexOf(config.operator) !== -1) {
+    if (isString(config.operator) &amp;&amp;
+      ['>=', '>', '==', '&lt;', '&lt;='].indexOf(config.operator) !== -1) {
       data.operator = config.operator;
     }
     else {
@@ -707,3 +735,26 @@ export default class Datahub {
     return this._crud(this.config.url + '/alert/' + name, 'GET');
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Datahub.html">Datahub</a></li><li><a href="HubForwarder.html">HubForwarder</a></li><li><a href="HubWatcher.html">HubWatcher</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addContent">addContent</a></li><li><a href="global.html#addContentToQueue">addContentToQueue</a></li><li><a href="global.html#alertStatus">alertStatus</a></li><li><a href="global.html#channelAlert">channelAlert</a></li><li><a href="global.html#createChannel">createChannel</a></li><li><a href="global.html#createGroupCallback">createGroupCallback</a></li><li><a href="global.html#deleteChannel">deleteChannel</a></li><li><a href="global.html#deleteGroupCallback">deleteGroupCallback</a></li><li><a href="global.html#getChannel">getChannel</a></li><li><a href="global.html#getChannels">getChannels</a></li><li><a href="global.html#getChannelStatus">getChannelStatus</a></li><li><a href="global.html#getContent">getContent</a></li><li><a href="global.html#getEarliest">getEarliest</a></li><li><a href="global.html#getGroupCallback">getGroupCallback</a></li><li><a href="global.html#getGroupCallbackContent">getGroupCallbackContent</a></li><li><a href="global.html#getGroupCallbacks">getGroupCallbacks</a></li><li><a href="global.html#getLatest">getLatest</a></li><li><a href="global.html#getTime">getTime</a></li><li><a href="global.html#groupAlert">groupAlert</a></li><li><a href="global.html#updateChannel">updateChannel</a></li><li><a href="global.html#updateGroupCallback">updateGroupCallback</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a> on Wed Sep 06 2017 09:28:41 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
