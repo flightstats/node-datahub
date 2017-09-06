@@ -103,14 +103,14 @@ export default class Datahub {
             return Promise.resolve(); // don't reject whole queue if one queue item fails...
           });
       }, { concurrency: 10 })
-        .then(function(resp) {
+        .then(function(hubResponse) {
           if (that.queueShouldFinish) {
             that.stopQueue();
             that.queueShouldFinish = false;
           }
 
           if (that.config.queueFinishedCallback) {
-            that.config.queueFinishedCallback(resp);
+            that.config.queueFinishedCallback(hubResponse, queueItems);
           }
         });
     }
