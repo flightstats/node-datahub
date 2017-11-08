@@ -420,13 +420,13 @@ export default class Datahub {
     }
 
     if (config.startItem) { data.startItem = config.startItem; }
-    if (config.paused === true) {
+    if (config.paused) {
       data.paused = true;
     }
     if (config.batch && (config.batch.toUpperCase() === 'SINGLE' || config.batch.toUpperCase() === 'MINUTE')) {
       data.batch = config.batch.toUpperCase();
     }
-    if (config.heartbeat === true) {
+    if (config.heartbeat) {
       data.heartbeat = true;
     }
 
