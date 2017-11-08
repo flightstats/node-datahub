@@ -1,5 +1,4 @@
 import rp from 'request-promise';
-import _ from 'lodash';
 import Promise from 'bluebird';
 import objectAssign from 'object-assign';
 import { isString, sanitizeURL } from './util';
@@ -40,7 +39,7 @@ export default class Datahub {
     }
 
     if (this.config.queueFinishedCallback &&
-        !_.isFunction(this.config.queueFinishedCallback)) {
+      typeof this.config.queueFinishedCallback !== 'function') {
       throw new Error('Queue finished callback should be a function');
     }
 
@@ -87,8 +86,8 @@ export default class Datahub {
       this.queue = { curCount: 0, data: {} };
 
       var queueItems = [];
-      _.forIn(queueItemsToParse, function (value, key) {
-        queueItems.push({ channelName: key, content: value });
+      Object.keys(queueItemsToParse).forEach(function (key) {
+        queueItems.push({ channelName: key, content: queueItemsToParse[key] });
       });
 
       Promise.map(queueItems, (queueItem) => {
@@ -421,13 +420,13 @@ export default class Datahub {
     }
 
     if (config.startItem) { data.startItem = config.startItem; }
-    if (_.isBoolean(config.paused) && config.paused) {
+    if (config.paused === true) {
       data.paused = true;
     }
     if (config.batch && (config.batch.toUpperCase() === 'SINGLE' || config.batch.toUpperCase() === 'MINUTE')) {
       data.batch = config.batch.toUpperCase();
     }
-    if (_.isBoolean(config.heartbeat) && config.heartbeat) {
+    if (config.heartbeat === true) {
       data.heartbeat = true;
     }
 
@@ -486,10 +485,10 @@ export default class Datahub {
       }
     }
 
-    if (_.isBoolean(config.paused)) {
+    if (typeof config.paused !== 'undefined') {
       data.paused = config.paused;
     }
-    if (_.isBoolean(config.heartbeat)) {
+    if (typeof config.heartbeat !== 'undefined') {
       data.heartbeat = config.heartbeat;
     }
 
