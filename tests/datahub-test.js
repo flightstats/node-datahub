@@ -1,6 +1,5 @@
 
 import { expect } from 'chai';
-import _  from 'lodash';
 import Datahub from '../src/index';
 import nock from 'nock';
 
@@ -458,7 +457,7 @@ describe('node-datahub Datahub', function(){
       }, 100);
       setTimeout(function() {
         expect(scope.isDone()).to.be.true;
-      }, 2000);
+      }, 10000);
     });
 
     it('should NOT send queue data that equals/exceeds queueMaxPending (queue disabled)', function(){
