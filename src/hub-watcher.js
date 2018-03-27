@@ -32,6 +32,7 @@ watcher.watchChannel('wma_email_outbox', sendEmail);
 
 import Datahub from './datahub';
 import os from 'os';
+import objectAssign from 'object-assign';
 import { sanitizeURL } from './util';
 
 let localIPAddress = null;
@@ -118,13 +119,15 @@ export default class HubWatcher {
           requestBodyData = req.body;
         }
 
-        const datahub = new Datahub({
+        const clientConfig = objectAssign({
           url: this.hubHost,
           requestPromiseOptions: {
             resolveWithFullResponse: true,
             json: this.config.json,
           },
-        });
+        }, this.config.client);
+
+        const datahub = new Datahub(clientConfig);
 
         return datahub.getGroupCallbackContent(requestBodyData)
         .then((hubDataItemResponse) => {
