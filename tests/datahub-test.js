@@ -412,6 +412,25 @@ describe('node-datahub Datahub', function(){
       promiseResolved(datahub.addContent('testChannel', { foo: 'bar' }), done);
     });
 
+    it('should encrypt', function(done) {
+      config.encryptionPassword = 'test';
+      var datahub = new Datahub(config);
+      var stringified = JSON.stringify({ foo: 'bar' });
+      nock(testHubUrl)
+        .post('/channel/testChannel', '278a970e71bbe158e31d3d15a095bdee')
+        .reply(200, {
+          '_links': {
+            self: {
+              href: testHubUrl + '/channel/testChannel/123/345/777'
+            }
+          },
+          content: '278a970e71bbe158e31d3d15a095bdee',
+          timestamp: '2015-07-01T13:30:00.00Z'
+        });
+
+      promiseResolved(datahub.addContent('testChannel', stringified), done);
+    });
+
   });
 
   describe('addContentToQueue', function () {
@@ -585,6 +604,16 @@ describe('node-datahub Datahub', function(){
       nock(testHubUrl)
         .get('/channel/testChannel/2015/01/01/123abc')
         .reply(200, { foo: 'bar' });
+
+      promiseResolved(datahub.getContent('testChannel', '2015/01/01/123abc'), done);
+    });
+
+    it('should decrypt', function(done) {
+      config.encryptionPassword = 'test';
+      var datahub = new Datahub(config);
+      nock(testHubUrl)
+        .get('/channel/testChannel/2015/01/01/123abc')
+        .reply(200, '278a970e71bbe158e31d3d15a095bdee');
 
       promiseResolved(datahub.getContent('testChannel', '2015/01/01/123abc'), done);
     });
