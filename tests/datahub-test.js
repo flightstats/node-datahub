@@ -417,7 +417,6 @@ describe('node-datahub Datahub', function(){
       var datahub = new Datahub(config);
       var stringified = JSON.stringify({ foo: 'bar' });
       nock(testHubUrl)
-        .log(console.log)
         .post('/channel/testChannel', '278a970e71bbe158e31d3d15a095bdee')
         .reply(200, {
           '_links': {

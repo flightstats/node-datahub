@@ -287,7 +287,6 @@ export default class Datahub {
       if (typeof content !== 'string') {
         throw new Error('Content must be stringified when encrypting');
       }
-      console.log('content', content);
       return encrypt(content, this.config.encryptionPassword)
       .then(encrypted => this._crud(this.config.url + '/channel/' + name, 'POST', encrypted));
     }
