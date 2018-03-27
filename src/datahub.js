@@ -1,6 +1,7 @@
 import rp from 'request-promise';
 import Promise from 'bluebird';
 import objectAssign from 'object-assign';
+import { encrypt, decrypt } from 'crypto2';
 import { isString, sanitizeURL } from './util';
 
 const logger = console;
@@ -31,7 +32,8 @@ export default class Datahub {
       queueEnabled: true,
       queueTimerInterval: 10000,
       queueMaxPending: 1000,
-      queueFinishedCallback: null
+      queueFinishedCallback: null,
+      encryptionPassword: null,
     }, config);
 
     if (!this.config.url) {
@@ -124,10 +126,15 @@ export default class Datahub {
       options = objectAssign(options, this.config.requestPromiseOptions);
     }
 
-    if (method === 'GET') {
-      options.json = (options.json == null) ? true : options.json;
-    } else if (method === 'POST' || method === 'PUT') {
-      options.json = data;
+    if (this.config.encryptionPassword && (method === 'POST' || method === 'PUT')) {
+      options.body = data;
+    }
+    else {
+      if (method === 'GET') {
+        options.json = (options.json == null) ? true : options.json;
+      } else if (method === 'POST' || method === 'PUT') {
+        options.json = data;
+      }
     }
 
     return rp(url, options);
@@ -276,6 +283,15 @@ export default class Datahub {
       return Promise.reject(new Error('Missing content'));
     }
 
+    if (this.config.encryptionPassword) {
+      if (typeof content !== 'string') {
+        throw new Error('Content must be stringified when encrypting');
+      }
+      console.log('content', content);
+      return encrypt(content, this.config.encryptionPassword)
+      .then(encrypted => this._crud(this.config.url + '/channel/' + name, 'POST', encrypted));
+    }
+
     return this._crud(this.config.url + '/channel/' + name, 'POST', content);
   }
 
@@ -317,6 +333,17 @@ export default class Datahub {
 
     if (!id) {
       return Promise.reject(new Error('Missing content id'));
+    }
+
+    if (this.config.encryptionPassword) {
+      return this._crud(this.config.url + '/channel/' + name + '/' + id, 'GET')
+      .then(encrypted => {
+        if (typeof encrypted !== 'string') {
+          console.warn('Not attempting decrypt on non-string payload');
+          return encrypted;
+        }
+        return decrypt(encrypted, this.config.encryptionPassword);
+      });
     }
 
     return this._crud(this.config.url + '/channel/' + name + '/' + id, 'GET');
