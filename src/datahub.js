@@ -307,31 +307,6 @@ export default class Datahub {
   }
 
   /**
-   * Add channel content to the queue.
-   * It is sent when the queue reaches a max size or a period of time has elapsed.
-   * @param {string} name - channel name
-   * @param {string} content - text content to add to channel
-   */
-  addContentToQueue(name, content) {
-    if (name && content) {
-      this.queue.curCount += 1;
-      if (!(name in this.queue.data)) {
-        this.queue.data[name] = [];
-      }
-
-      this.queue.data[name].push(content);
-
-      if (this.queue.curCount >= this.config.queueMaxPending) {
-        this.stopQueue();
-        this.sendQueue();
-      }
-      else {
-        this.startQueue();
-      }
-    }
-  }
-
-  /**
    * Get channel content.
    * @see {@link https://github.com/flightstats/hub#fetch-content-from-channel|Fetch content from a Channel}
    * @param {string} name - channel name
