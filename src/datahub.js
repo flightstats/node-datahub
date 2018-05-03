@@ -117,7 +117,7 @@ export default class Datahub {
     }
   }
 
-  _crud(url, method, data) {
+  _crud(url, method, data, flags = {}) {
     var options = {
       method: method
     };
@@ -132,6 +132,18 @@ export default class Datahub {
     else {
       if (method === 'GET') {
         options.json = (options.json == null) ? true : options.json;
+
+        return rp(url, options)
+          .then(res => {
+            if (this.config.encryptionPassword && flags.isItem) {
+              if (typeof res !== 'string') {
+                console.warn('Not attempting decrypt on non-string payload');
+                return res;
+              }
+              return decrypt(res, this.config.encryptionPassword);
+            }
+            return res;
+          });
       } else if (method === 'POST' || method === 'PUT') {
         options.json = data;
       }
@@ -334,18 +346,9 @@ export default class Datahub {
       return Promise.reject(new Error('Missing content id'));
     }
 
-    if (this.config.encryptionPassword) {
-      return this._crud(this.config.url + '/channel/' + name + '/' + id, 'GET')
-      .then(encrypted => {
-        if (typeof encrypted !== 'string') {
-          console.warn('Not attempting decrypt on non-string payload');
-          return encrypted;
-        }
-        return decrypt(encrypted, this.config.encryptionPassword);
-      });
-    }
+    const url = this.config.url + '/channel/' + name + '/' + id;
 
-    return this._crud(this.config.url + '/channel/' + name + '/' + id, 'GET');
+    return this._crud(url, 'GET', { isItem: true });
   }
 
   /**
@@ -364,7 +367,7 @@ export default class Datahub {
     }
 
     return this._crud(this.config.url + '/channel/' + name + '/latest' +
-      ((N) ? '/' + N : ''), 'GET');
+      ((N) ? '/' + N : ''), 'GET', { isItem: true });
   }
 
   /**
@@ -383,7 +386,7 @@ export default class Datahub {
     }
 
     return this._crud(this.config.url + '/channel/' + name + '/earliest' +
-      ((N) ? '/' + N : ''), 'GET');
+      ((N) ? '/' + N : ''), 'GET', { isItem: true });
   }
 
   /**
@@ -582,7 +585,7 @@ export default class Datahub {
       return Promise.reject(new Error('Missing data'));
     } else {
       var url = data.uris[0];
-      return this._crud(url, 'GET');
+      return this._crud(url, 'GET', { isItem: true });
     }
   }
 
