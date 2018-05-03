@@ -146,14 +146,14 @@ export default class HubWatcher {
           })
         })
         .catch((err) => {
-          console.error('[node-datahub HubWatcher] Error getting', channelName, 'callback content:', err);
+          console.log('[node-datahub HubWatcher] Error getting', channelName, 'callback content:', err);
         })
         .then(() => {
           res.status(responseStatusCode).end();
         });
       }
       catch(err) {
-        console.error('[node-datahub HubWatcher] Caught error getting', channelName, 'callback content:', err);
+        console.log('[node-datahub HubWatcher] Caught error getting', channelName, 'callback content:', err);
         res.status(responseStatusCode).end();
       }
     }
@@ -173,10 +173,15 @@ export default class HubWatcher {
       callbackConfig.startItem = this.config.startItem;
     }
 
-    const datahub = new Datahub({
+    const clientConfig = objectAssign({
       url: this.hubHost,
-      requestPromiseOptions: { resolveWithFullResponse: true },
-    });
+      requestPromiseOptions: {
+        resolveWithFullResponse: true,
+        json: this.config.json,
+      },
+    }, this.config.client);
+
+    const datahub = new Datahub(clientConfig);
 
     return datahub.getGroupCallback(callbackName)
     .then((result) => {
@@ -192,10 +197,8 @@ export default class HubWatcher {
           return createHubCallback(datahub, callbackConfig);
         })
         .catch((error) => {
-          console.error('[node-datahub HubWatcher] Error deleting hub callback:', error.stack);
-          done(error);
-        }
-        );
+          console.log('[node-datahub HubWatcher] Error deleting hub callback:', error.stack);
+        });
       }
       else {
         // Existing callback configured properly
@@ -208,7 +211,7 @@ export default class HubWatcher {
         return createHubCallback(datahub, callbackConfig);
       }
 
-      console.error('[node-datahub HubWatcher] Error retrieving group callback:', error);
+      console.log('[node-datahub HubWatcher] Error retrieving group callback:', error);
 
       return null;
     });
@@ -222,7 +225,7 @@ function createHubCallback(datahub, callbackConfig) {
     console.log('[node-datahub HubWatcher] Created hub callback for', callbackConfig.name);
   })
   .catch((error) => {
-    console.error('[node-datahub HubWatcher] Failed to create callback:', error);
+    console.log('[node-datahub HubWatcher] Failed to create callback:', error);
   });
 }
 
