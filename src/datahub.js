@@ -133,17 +133,20 @@ export default class Datahub {
       if (method === 'GET') {
         options.json = (options.json == null) ? true : options.json;
 
-        return rp(url, options)
-          .then(res => {
-            if (this.config.encryptionPassword && flags.isItem) {
-              if (typeof res !== 'string') {
-                console.warn('Not attempting decrypt on non-string payload');
-                return res;
+        if (this.config.encryptionPassword && flags.isItem) {
+          options.json = false;
+          return rp(url, options)
+            .then(res => {
+              try {
+                const parsedJSON = JSON.parse(res);
+                console.warn('Got unencrypted payload');
+                return parsedJSON;
+              } catch (e) {
+                console.log('Decrypting...');
+                return decrypt(res, this.config.encryptionPassword);
               }
-              return decrypt(res, this.config.encryptionPassword);
-            }
-            return res;
-          });
+            });
+        }
       } else if (method === 'POST' || method === 'PUT') {
         options.json = data;
       }
@@ -299,6 +302,7 @@ export default class Datahub {
       if (typeof content !== 'string') {
         throw new Error('Content must be stringified when encrypting');
       }
+      console.log('Encrypting...');
       return encrypt(content, this.config.encryptionPassword)
       .then(encrypted => this._crud(this.config.url + '/channel/' + name, 'POST', encrypted));
     }
