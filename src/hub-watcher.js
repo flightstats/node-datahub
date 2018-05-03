@@ -128,9 +128,10 @@ export default class HubWatcher {
         }, this.config.client);
 
         const datahub = new Datahub(clientConfig);
-
+        console.log('requestBodyData', requestBodyData);
         return datahub.getGroupCallbackContent(requestBodyData)
         .then((hubDataItemResponse) => {
+          console.log('hubDataItemResponse', hubDataItemResponse);
           if (requestBodyData.uris && requestBodyData.uris.length > 1) {
             throw new Error(`HubWatcher: Expected hub callback "uris" attribute to be length 1 but was ${JSON.stringify(requestBodyData.uris)}`);
           }
@@ -139,9 +140,11 @@ export default class HubWatcher {
 
           return fnHandler(hubDataItemResponse.body, hubDataItemURI)
           .then((result) => {
+            console.log('result', result);
             responseStatusCode = SUCCESS_STATUS_CODE;
           })
           .catch((err) => {
+            console.log('err', err);
             throw new Error(`Error running ${channelName} callback handler: ${err}`);
           })
         })
