@@ -327,7 +327,7 @@ export default class Datahub {
 
     const url = this.config.url + '/channel/' + name + '/' + id;
 
-    return this._crud(url, 'GET', { isItem: true });
+    return this._crud(url, 'GET', null, { isItem: true });
   }
 
   /**
@@ -346,7 +346,7 @@ export default class Datahub {
     }
 
     return this._crud(this.config.url + '/channel/' + name + '/latest' +
-      ((N) ? '/' + N : ''), 'GET', { isItem: true });
+      ((N) ? '/' + N : ''), 'GET', null, { isItem: true });
   }
 
   /**
@@ -365,7 +365,7 @@ export default class Datahub {
     }
 
     return this._crud(this.config.url + '/channel/' + name + '/earliest' +
-      ((N) ? '/' + N : ''), 'GET', { isItem: true });
+      ((N) ? '/' + N : ''), 'GET', null, { isItem: true });
   }
 
   /**
@@ -564,7 +564,7 @@ export default class Datahub {
       return Promise.reject(new Error('Missing data'));
     } else {
       var url = data.uris[0];
-      return this._crud(url, 'GET', { isItem: true });
+      return this._crud(url, 'GET', null, { isItem: true });
     }
   }
 
