@@ -138,7 +138,7 @@ export default class HubWatcher {
 
           const hubDataItemURI = (requestBodyData.uris ? requestBodyData.uris[0] : null);
 
-          return fnHandler(hubDataItemResponse.body, hubDataItemURI)
+          return fnHandler((hubDataItemResponse.body || hubDataItemResponse), hubDataItemURI)
           .then((result) => {
             console.log('result', result);
             responseStatusCode = SUCCESS_STATUS_CODE;
