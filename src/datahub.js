@@ -137,6 +137,7 @@ export default class Datahub {
           options.json = false;
           return rp(url, options)
             .then(res => {
+              console.log('res', res);
               try {
                 const parsedJSON = JSON.parse(res);
                 console.warn('Got unencrypted payload');
