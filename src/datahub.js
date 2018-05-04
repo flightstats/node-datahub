@@ -12,10 +12,6 @@ const logger = console;
    * @param {Object} config - configuration object
    * @param {string} config.url - datahub url
    * @param {Object} [config.requestPromiseOptions] - options passed to request-promise
-   * @param {boolean} [config.queueEnabled=true] - enable/disable the sending of channel data via a queue
-   * @param {number} [config.queueTimerInterval=10000] - the timer interval (in milliseconds) that is used for sending queued channel data
-   * @param {number} [config.queueMaxPending=1000] - the maximum number of items held in the channel data queue before being sent
-   * @param {function} [config.queueFinishedCallback=null] - a callback function to be called after the queue has finished sending
    *
    * @see {@link https://github.com/flightstats/hub|Hub}
    * @example
@@ -29,10 +25,6 @@ export default class Datahub {
     this.config = objectAssign({
       url: null,
       logger: logger,
-      queueEnabled: true,
-      queueTimerInterval: 10000,
-      queueMaxPending: 1000,
-      queueFinishedCallback: null,
       encryptionPassword: null,
     }, config);
 
@@ -40,81 +32,7 @@ export default class Datahub {
       throw new Error('Missing datahub URL');
     }
 
-    if (this.config.queueFinishedCallback &&
-      typeof this.config.queueFinishedCallback !== 'function') {
-      throw new Error('Queue finished callback should be a function');
-    }
-
     this.config.url = sanitizeURL(this.config.url);
-
-    this.queueShouldFinish = false;
-    this.queue = { curCount: 0, data: {} }; // { curCount: X, data: { channelName1: content, channelName2: content, ... } }
-    this.queueTimerId = null;
-    this.queueTimerCallback = this.sendQueue.bind(this);
-
-    Object.defineProperty(this, 'queueEnabled', {
-      get: function() {
-        return this.config.queueEnabled;
-      },
-      set: function(val) {
-        this.config.queueEnabled = val;
-      }
-    });
-  }
-
-  startQueue() {
-    if (!this.queueTimerId) {
-      this.queueTimerId = setInterval(this.queueTimerCallback, this.config.queueTimerInterval);
-    }
-  }
-
-  stopQueue() {
-    if (this.queueTimerId) {
-      clearInterval(this.queueTimerId);
-      this.queueTimerId = null;
-    }
-  }
-
-  finishQueue() {
-    if (this.queueTimerId) {
-      this.queueShouldFinish = true;
-    }
-  }
-
-  sendQueue() {
-    if (this.config.queueEnabled && this.queue.curCount > 0) {
-      var that = this;
-      var queueItemsToParse = this.queue.data;
-      this.queue = { curCount: 0, data: {} };
-
-      var queueItems = [];
-      Object.keys(queueItemsToParse).forEach(function (key) {
-        queueItems.push({ channelName: key, content: queueItemsToParse[key] });
-      });
-
-      Promise.map(queueItems, (queueItem) => {
-        return that.addContent(queueItem.channelName, queueItem.content)
-          .then(function(resp) {
-            that.config.logger.log('[node-datahub] Successfully added ' + queueItem.content.length +
-              ' queued items to \'' + queueItem.channelName + '\'');
-            return Promise.resolve(resp);
-          }, function(err) {
-            that.config.logger.error('[node-datahub] Error adding queued items to \'' +
-              queueItem.channelName + '\'', (err.message) ? err.message : err);
-            return Promise.resolve(); // don't reject whole queue if one queue item fails...
-          });
-      }, { concurrency: 10 })
-        .then(function(hubResponse) {
-          if (that.queueShouldFinish) {
-            that.stopQueue();
-            that.queueShouldFinish = false;
-          }
-
-          if (that.config.queueFinishedCallback) {
-            that.config.queueFinishedCallback(hubResponse, queueItems);
-          }
-        });
-    }
   }
 
   _crud(url, method, data, flags = {}) {
@@ -143,7 +61,8 @@ export default class Datahub {
                 console.warn('Got unencrypted payload');
                 return parsedJSON;
               } catch (e) {
-                console.log('Decrypting...');
+                console.log('Using password', this.config.encryptionPassword);
+                console.log('Decrypting...', body);
                 return decrypt(body, this.config.encryptionPassword);
               }
             });
@@ -567,151 +486,5 @@ export default class Datahub {
       var url = data.uris[0];
       return this._crud(url, 'GET', null, { isItem: true });
     }
-  }
-
-  /**
-   * Create/update a channel alert.
-   * @see {@link https://github.com/flightstats/hub#alerts|Alerts}
-   * @param {string} name - alert name
-   * @param {Object} config - configuration details for channel alert
-   * @param {string} config.source - name of the channel to monitor
-   * @param {string} config.serviceName - user defined end point for the alert
-   * @param {number} config.timeWindowMinutes - period of time to evaluate
-   * @param {string} config.operator - can be '>=', '>', '==', '<', or '<='
-   * @param {number} config.threshold - value to compare
-   */
-  channelAlert(name, config) {
-    if (!name) {
-      return Promise.reject(new Error('Missing alert name'));
-    }
-
-    if (!config) {
-      return Promise.reject(new Error('Missing alert configuration'));
-    }
-
-    if (!config.source) {
-      return Promise.reject(new Error('Missing alert source'));
-    }
-
-    if (!config.serviceName) {
-      return Promise.reject(new Error('Missing alert service name'));
-    }
-
-    if (!config.timeWindowMinutes) {
-      return Promise.reject(new Error('Missing alert time window'));
-    }
-
-    if (!config.operator) {
-      return Promise.reject(new Error('Missing alert operator'));
-    }
-
-    if (!config.threshold) {
-      return Promise.reject(new Error('Missing alert threshold'));
-    }
-
-    var data = {
-      source: config.source,
-      serviceName: config.serviceName,
-      type: 'channel'
-    };
-
-    if (Number.isFinite(config.timeWindowMinutes)) {
-      data.timeWindowMinutes = config.timeWindowMinutes;
-    } else if (isString(config.timeWindowMinutes)) {
-      var timeWindowMinutes = parseInt(config.timeWindowMinutes, 10);
-      if (timeWindowMinutes) {
-        data.timeWindowMinutes = timeWindowMinutes;
-      }
-    }
-    if (!data.timeWindowMinutes) {
-      return Promise.reject(new Error('Invalid alert time window'));
-    }
-
-    if (isString(config.operator) &&
-      ['>=', '>', '==', '<', '<='].indexOf(config.operator) !== -1) {
-      data.operator = config.operator;
-    }
-    else {
-      return Promise.reject(new Error('Invalid alert operator'));
-    }
-
-    if (Number.isFinite(config.threshold)) {
-      data.threshold = config.threshold;
-    } else if (isString(config.threshold)) {
-      var threshold = parseInt(config.threshold, 10);
-      if (threshold) {
-        data.threshold = threshold;
-      }
-    }
-    if (!data.threshold) {
-      return Promise.reject(new Error('Invalid alert threshold'));
-    }
-
-    return this._crud(this.config.url + '/alert/' + name, 'PUT', data);
-  }
-
-  /**
-   * Create/update a group alert.
-   * @see {@link https://github.com/flightstats/hub#alerts|Alerts}
-   * @param {string} name - alert name
-   * @param {Object} config - configuration details for group alert
-   * @param {string} config.source - name of the group to monitor
-   * @param {string} config.serviceName - user defined end point for the alert
-   * @param {number} config.timeWindowMinutes - period of time to evaluate
-   */
-  groupAlert(name, config) {
-    if (!name) {
-      return Promise.reject(new Error('Missing alert name'));
-    }
-
-    if (!config) {
-      return Promise.reject(new Error('Missing alert configuration'));
-    }
-
-    if (!config.source) {
-      return Promise.reject(new Error('Missing alert source'));
-    }
-
-    if (!config.serviceName) {
-      return Promise.reject(new Error('Missing alert service name'));
-    }
-
-    if (!config.timeWindowMinutes) {
-      return Promise.reject(new Error('Missing alert time window'));
-    }
-
-    var data = {
-      source: config.source,
-      serviceName: config.serviceName,
-      type: 'group'
-    };
-
-    if (Number.isFinite(config.timeWindowMinutes)) {
-      data.timeWindowMinutes = config.timeWindowMinutes;
-    } else if (isString(config.timeWindowMinutes)) {
-      var timeWindowMinutes = parseInt(config.timeWindowMinutes, 10);
-      if (timeWindowMinutes) {
-        data.timeWindowMinutes = timeWindowMinutes;
-      }
-    }
-    if (!data.timeWindowMinutes) {
-      return Promise.reject(new Error('Invalid alert time window'));
-    }
-
-    return this._crud(this.config.url + '/alert/' + name, 'PUT', data);
-  }
-
-  /**
-   * Get channel/group alert status.
-   * @see {@link https://github.com/flightstats/hub#channel-alert-status|Channel Alert Status}
-   * @see {@link https://github.com/flightstats/hub#group-alert-status|Channel Group Status}
-   * @param {string} name - alert name
-   */
-  alertStatus(name) {
-    if (!name) {
-      return Promise.reject(new Error('Missing alert name'));
-    }
-
-    return this._crud(this.config.url + '/alert/' + name, 'GET');
   }
 }
