@@ -61,8 +61,7 @@ export default class Datahub {
                 console.warn('Got unencrypted payload');
                 return parsedJSON;
               } catch (e) {
-                console.log('Using password', this.config.encryptionPassword);
-                console.log('Decrypting...', body);
+                console.log('Decrypting...');
                 return decrypt(body, this.config.encryptionPassword);
               }
             });
