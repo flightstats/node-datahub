@@ -55,6 +55,7 @@ export default class Datahub {
           options.json = false;
           return rp(url, options)
             .then(res => {
+              console.log('body', body);
               const body = options.resolveWithFullResponse ? res.body : res;
               try {
                 const parsedJSON = JSON.parse(body);
