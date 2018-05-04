@@ -137,14 +137,14 @@ export default class Datahub {
           options.json = false;
           return rp(url, options)
             .then(res => {
-              console.log('res', res);
+              const body = options.resolveWithFullResponse ? res.body : res;
               try {
-                const parsedJSON = JSON.parse(res);
+                const parsedJSON = JSON.parse(body);
                 console.warn('Got unencrypted payload');
                 return parsedJSON;
               } catch (e) {
                 console.log('Decrypting...');
-                return decrypt(res, this.config.encryptionPassword);
+                return decrypt(body, this.config.encryptionPassword);
               }
             });
         }
