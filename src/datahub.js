@@ -53,6 +53,7 @@ export default class Datahub {
 
         if (this.config.encryptionPassword && flags.isItem) {
           options.json = false;
+          console.log('rp', url, options);
           return rp(url, options)
             .then(res => {
               console.log('body', body);
