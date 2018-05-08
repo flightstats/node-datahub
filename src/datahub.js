@@ -44,7 +44,7 @@ export default class Datahub {
       options = objectAssign(options, this.config.requestPromiseOptions);
     }
 
-    if (this.config.encryptionPassword && (method === 'POST' || method === 'PUT')) {
+    if (this.config.encryptionPassword && flags.isItem && (method === 'POST' || method === 'PUT')) {
       options.body = data;
     }
     else {
@@ -225,7 +225,7 @@ export default class Datahub {
       }
       console.log('Encrypting...');
       return encrypt(content, this.config.encryptionPassword)
-      .then(encrypted => this._crud(this.config.url + '/channel/' + name, 'POST', encrypted));
+      .then(encrypted => this._crud(this.config.url + '/channel/' + name, 'POST', encrypted, { isItem: true }));
     }
 
     return this._crud(this.config.url + '/channel/' + name, 'POST', content);
