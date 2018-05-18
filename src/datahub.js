@@ -53,17 +53,13 @@ export default class Datahub {
 
         if (this.config.encryptionPassword && flags.isItem) {
           options.json = false;
-          console.log('rp', url, options);
           return rp(url, options)
             .then(res => {
-              console.log('body', body);
               const body = options.resolveWithFullResponse ? res.body : res;
               try {
                 const parsedJSON = JSON.parse(body);
-                console.warn('Got unencrypted payload');
                 return parsedJSON;
               } catch (e) {
-                console.log('Decrypting...');
                 return decrypt(body, this.config.encryptionPassword);
               }
             });
@@ -223,7 +219,6 @@ export default class Datahub {
       if (typeof content !== 'string') {
         throw new Error('Content must be stringified when encrypting');
       }
-      console.log('Encrypting...');
       return encrypt(content, this.config.encryptionPassword)
       .then(encrypted => this._crud(this.config.url + '/channel/' + name, 'POST', encrypted, { isItem: true }));
     }
