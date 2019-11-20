@@ -167,6 +167,7 @@ export default class HubWatcher {
       channelName: channelName,
       callbackUrl: buildCallbackUrl(channelName, this.appHost),
       parallelCalls: this.config.hubParallelCalls,
+      maxAttempts: 1,
     };
 
     if (this.config.startItem) {
